@@ -1,15 +1,17 @@
 // ==UserScript==
-// @name         Ultra Popup Blocker
-// @description  Configurable popup blocker that blocks all popup windows by default.
-// @namespace    eskander.github.io
-// @author       Eskander
-// @version      4.1
+// @name         Ultra Popup Blocker (Enhanced Edition)
+// @description  A sleek, modern popup blocker with an Apple-inspired glassmorphism UI and advanced redirect protection.
+// @namespace    https://github.com/1Tdd
+// @author       1Tdd (Original by Eskander)
+// @version      5.1
 // @include      *
 // @license      MIT
-// @homepage     https://github.com/Eskander/ultra-popup-blocker
-// @supportURL   https://github.com/Eskander/ultra-popup-blocker/issues/new
+// @homepage     https://github.com/1Tdd/ultra-popup-blocker
+// @supportURL   https://github.com/1Tdd/ultra-popup-blocker/issues/new
+// @icon         data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJhdXJvcmEtZ3JhZGllbnQiIHgxPSIwJSIgeTE9IjEwMCUiIHgyPSIxMDAlIiB5Mj0iMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM1ODU2RDYiLz48c3RvcCBvZmZzZXQ9IjUwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGMkQ1NSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGOTgwQSIvPjwvbGluZWFyR3JhZGllbnQ+PG1hc2sgaWQ9InRleHQtbWFzayI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IndoaXRlIiAvPjx0ZXh0IHg9IjUwJSIgeT0iNTMlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgQmxpbmtNYWNTeXN0Rm9udCwgJ1NlZ29lIFVJJywgUm9ib3RvLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjQwIiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iYmxhY2siPlVQQjwvdGV4dD48L21hc2s+PC9kZWZzPjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiByeD0iMjIiIGZpbGw9IiMwMDAwMDAiIC8+PHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iODAiIGhlaWdodD0iODAiIHJ4PSIyMiIgZmlsbD0idXJsKCNhdXJvcmEtZ3JhZGllbnQpIiBtYXNrPSJ1cmwoI3RleHQtbWFzaykiIC8+PC9zdmc+
 // @compatible   firefox Tampermonkey / Violentmonkey
 // @compatible   chrome Tampermonkey / Violentmonkey
+// @run-at       document-start
 // @grant        GM.getValue
 // @grant        GM.setValue
 // @grant        GM.deleteValue
@@ -17,417 +19,84 @@
 // @grant        GM.registerMenuCommand
 // ==/UserScript==
 
-/* Constants and Globals */
-const CONSTANTS = {
-  TIMEOUT_SECONDS: 15,
-  TRUNCATE_LENGTH: 50,
-  MODAL_WIDTH: '400px'
-}
+(function() {
+    'use strict';
+    try {
+        const CONSTANTS = { TIMEOUT_SECONDS: 15, TRUNCATE_LENGTH: 50, MODAL_WIDTH: '550px', TOAST_TIMEOUT_SECONDS: 3, DEBOUNCE_MS: 250, MODAL_Z_INDEX_THRESHOLD: 1000, LOGO_SVG_URL: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJhdXJvcmEtZ3JhZGllbnQiIHgxPSIwJSIgeTE9IjEwMCUiIHgyPSIxMDAlIiB5Mj0iMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM1ODU2RDYiLz48c3RvcCBvZmZzZXQ9IjUwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGMkQ1NSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGOTgwQSIvPjwvbGluZWFyR3JhZGllbnQ+PG1hc2sgaWQ9InRleHQtbWFzayI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IndoaXRlIiAvPjx0ZXh0IHg9IjUwJSIgeT0iNTMlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgQmxpbmtNYWNTeXN0Rm9udCwgJ1NlZ29lIFVJJywgUm9ib3RvLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjQwIiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iYmxhY2siPlVQQjwvdGV4dD48L21hc2s+PC9kZWZzPjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiByeD0iMjIiIGZpbGw9IiMwMDAwMDAiIC8+PHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iODAiIGhlaWdodD0iODAiIHJ4PSIyMiIgZmlsbD0idXJsKCNhdXJvcmEtZ3JhZGllbnQpIiBtYXNrPSJ1cmwoI3RleHQtbWFzaykiIC8+PC9zdmc+" };
+        const global = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
+        const realWindowOpen = global.open;
+        const FakeWindow = (() => { const p = { get: (t, r) => r === "closed" ? !0 : new Proxy(function() {}, p), set: () => !0, apply: () => void 0 }; return new Proxy(function() {}, p) })();
+        if (typeof global._realDocumentWrite === "undefined") { global._realDocumentWrite = document.write; global._realDocumentWriteln = document.writeln }
 
-const STYLES = {
-  modal: `
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    background-color: #ffffff !important;
-    color: #000000 !important;
-    width: ${CONSTANTS.MODAL_WIDTH} !important;
-    border: 1px solid #000000 !important;
-    z-index: 2147483647 !important;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.5) !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    font-family: Arial !important;
-    font-size: 14px !important;
-    line-height: 1.5 !important;
-    box-sizing: border-box !important;
-  `,
-  modalHeader: `
-    background-color: #000000 !important;
-    padding: 30px 40px !important;
-    color: #ffffff !important;
-    text-align: center !important;
-    margin: 0 !important;
-    font-size: inherit !important;
-    line-height: inherit !important;
-  `,
-  modalFooter: `
-    background-color: #000000 !important;
-    padding: 5px 40px !important;
-    color: #ffffff !important;
-    text-align: center !important;
-    margin: 0 !important;
-  `,
-  button: `
-    margin-right: 20px !important;
-    padding: 5px !important;
-    cursor: pointer !important;
-    font-family: inherit !important;
-    font-size: inherit !important;
-    line-height: inherit !important;
-    border: 1px solid #000000 !important;
-    background: #ffffff !important;
-    color: #000000 !important;
-    border-radius: 3px !important;
-  `,
-  notificationBar: `
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    z-index: 2147483646 !important;
-    width: 100% !important;
-    padding: 5px !important;
-    font-family: Arial !important;
-    font-size: 14px !important;
-    line-height: 1.5 !important;
-    background-color: #000000 !important;
-    color: #ffffff !important;
-    display: none !important;
-    margin: 0 !important;
-    box-sizing: border-box !important;
-  `,
-  listItem: `
-    padding: 12px 8px 12px 40px !important;
-    font-size: 18px !important;
-    background-color: #ffffff !important;
-    color: #000000 !important;
-    border-bottom: 1px solid #000000 !important;
-    position: relative !important;
-    transition: 0.2s !important;
-    margin: 0 !important;
-  `,
-  removeButton: `
-    cursor: pointer !important;
-    position: absolute !important;
-    right: 0 !important;
-    top: 0 !important;
-    padding: 12px 16px !important;
-    background: transparent !important;
-    border: none !important;
-    color: #000000 !important;
-  `
-}
+        const fullStyles = `
+            .upb-base-button { display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; padding: 10px 20px !important; border-radius: 9999px !important; border: 1px solid rgba(255,255,255,0.1) !important; font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important; transition: all 0.2s ease-out !important; line-height: 1.2 !important; }
+            .upb-base-button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+            .upb-base-button:active { transform: scale(0.96); filter: brightness(0.95); transition-duration: 0.1s; }
+            .upb-button--allow { background-image: linear-gradient(to right, #24D169, #23C15D) !important; color: #003D11 !important; border: none !important; }
+            .upb-button--trust { background-image: linear-gradient(to right, #0B84FF, #3DA0FF) !important; color: white !important; border: none !important; }
+            .upb-button--deny { background-image: linear-gradient(to right, #FF3B30, #FF453A) !important; color: white !important; border: none !important; }
+            .upb-button--denyTemp { background-image: linear-gradient(to right, #5856D6, #6B69D6) !important; color: white !important; border: none !important; }
+            .upb-button--config, .upb-button--neutral { background-color: rgba(118, 118, 128, 0.3) !important; color: white !important; border-color: rgba(255,255,255,0.15) !important;}
+            .upb-button--config:hover, .upb-button--neutral:hover { background-color: rgba(118, 118, 128, 0.5) !important; }
+            #upb-notification-bar { position: fixed !important; bottom: 20px !important; left: 50% !important; transform: translateX(-50%) !important; z-index: 2147483646 !important; width: auto !important; max-width: 95% !important; padding: 12px !important; border-radius: 20px !important; display: none; align-items: center !important; gap: 15px !important; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif !important; font-size: 14px !important; color: #F5F5F7 !important; background-color: rgba(28, 28, 30, 0.7) !important; -webkit-backdrop-filter: blur(25px) !important; backdrop-filter: blur(25px) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.15); }
+            #upb-config-modal { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: ${CONSTANTS.MODAL_WIDTH} !important; z-index: 2147483647 !important; border-radius: 24px !important; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif !important; color: #F5F5F7 !important; overflow: hidden !important; background-color: rgba(28, 28, 30, 0.7) !important; -webkit-backdrop-filter: blur(25px) !important; backdrop-filter: blur(25px) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.15); }
+            #upb-modal-header { padding: 16px !important; text-align: center !important; font-size: 18px !important; font-weight: 600 !important; border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important; background-color: rgba(255, 255, 255, 0.05) !important; display: flex; align-items: center; justify-content: center; gap: 10px; }
+            #upb-modal-content { padding: 20px !important; display: flex !important; justify-content: space-between !important; gap: 20px !important; }
+            .upb-list-section { width: 48%; }
+            #upb-modal-footer { padding: 10px 20px !important; text-align: center !important; border-top: 1px solid rgba(255, 255, 255, 0.15) !important; background-color: rgba(0, 0, 0, 0.1) !important; }
+            .upb-input { width: 100% !important; padding: 10px !important; background-color: rgba(118, 118, 128, 0.24) !important; border: 1px solid rgba(118, 118, 128, 0.32) !important; border-radius: 8px !important; color: #F5F5F7 !important; font-size: 14px !important; box-sizing: border-box !important; }
+            .upb-list { margin: 0 !important; padding: 0 !important; list-style-type: none !important; max-height: 250px !important; overflow-y: auto !important; background-color: rgba(118, 118, 128, 0.12) !important; border-radius: 12px !important; border: 1px solid rgba(255,255,255,0.08) !important; }
+            .upb-list-item { display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 10px 12px !important; border-bottom: 1px solid rgba(118, 118, 128, 0.12) !important; }
+            .upb-remove-button { width: 22px !important; height: 22px !important; border-radius: 50% !important; background-color: rgba(118, 118, 128, 0.24) !important; color: #F5F5F7 !important; font-weight: bold !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; padding-bottom: 2px !important; transition: all 0.2s ease-out; }
+            .upb-remove-button:hover { background-color: #FF453A !important; }
+            .upb-button-container { display: flex; gap: 8px; border-left: 1px solid rgba(255, 255, 255, 0.15); padding-left: 15px; }
+            .upb-info-section { display: flex; align-items: center; gap: 15px; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+            @media (max-width: 600px) { #upb-notification-bar { flex-direction: column !important; text-align: center; } .upb-button-container { border-left: none !important; padding-left: 0 !important; border-top: 1px solid rgba(255, 255, 255, 0.15) !important; padding-top: 10px !important; flex-wrap: wrap; justify-content: center; } #upb-config-modal { width: 95vw !important; max-height: 85vh !important; display: flex !important; flex-direction: column !important; } #upb-modal-content { flex-direction: column !important; gap: 15px !important; overflow-y: auto; padding: 15px !important; } .upb-list-section { width: 100% !important; } }
+        `;
+        if (!document.getElementById("upb-styles")) { const styleSheet = document.createElement("style"); styleSheet.id = "upb-styles"; styleSheet.textContent = fullStyles; document.head.appendChild(styleSheet); }
+        
+        class EventManager { constructor() { this.events = {} } on(e, t) { this.events[e] = this.events[e] || [], this.events[e].push(t) } off(e, t) { this.events[e] && (this.events[e] = this.events[e].filter(n => n !== t)) } emit(e, t) { this.events[e] && this.events[e].forEach(n => n(t)) } }
+        const events = new EventManager;
+        class DomainManager { static PREFIX_ALLOW = "allow_"; static PREFIX_DENY = "deny_"; static INDEX_KEY = "upb_domain_index"; static MIGRATED_KEY = "upb_migrated_v9"; static async getIndex() { let e = await GM.getValue(this.INDEX_KEY); return e && typeof e.allowed != "undefined" || (e = { allowed: [], denied: [] }), e } static async saveIndex(e) { await GM.setValue(this.INDEX_KEY, e) } static async runMigration() { if (await GM.getValue(this.MIGRATED_KEY)) return; console.log("[UPB] Running one-time migration..."); try { const e = await GM.listValues(), t = { allowed: [], denied: [] }; for (const n of e) n.startsWith(this.PREFIX_ALLOW) ? t.allowed.push(n.substring(this.PREFIX_ALLOW.length)) : n.startsWith(this.PREFIX_DENY) && t.denied.push(n.substring(this.PREFIX_DENY.length)); await this.saveIndex(t), console.log("[UPB] Migration successful.") } catch (e) { console.error("[UPB] Migration failed.", e), await this.saveIndex({ allowed: [], denied: [] }) } await GM.setValue(this.MIGRATED_KEY, !0) } static parseAndValidateDomain(e) { try { if (!e || typeof e != "string") return null; let t = e.includes("//") ? new URL(e).hostname : e; if (t = t.trim().toLowerCase(), t.startsWith("www.") && (t = t.substring(4)), !t || !t.includes(".")) return null; const n = t.split("."); if (n.length < 2 || n.some(s => s.length === 0)) return null; const o = ["co.uk", "com.au", "com.br", "gov.uk", "ac.uk", "co.jp", "co.in"], i = n.slice(-2).join("."); return o.includes(i) && n.length > 2 ? n.slice(-3).join(".") : n.slice(-2).join(".") } catch (t) { return null } } static async getDomainState(e) { return e ? await GM.getValue(this.PREFIX_ALLOW + e) ? "allow" : await GM.getValue(this.PREFIX_DENY + e) ? "deny" : "ask" : "ask" } static async getCurrentDomainState() { const e = await this.getCurrentTopDomain(); return this.getDomainState(e) } static async getCurrentTopDomain() { return this.parseAndValidateDomain(location.hostname) } static async addAllowedDomain(e) { const t = await this.getIndex(); t.allowed.includes(e) || t.allowed.push(e), t.denied = t.denied.filter(n => n !== e), await this.saveIndex(t), await GM.setValue(this.PREFIX_ALLOW + e, !0), await GM.deleteValue(this.PREFIX_DENY + e), events.emit("domainListChanged") } static async addDeniedDomain(e) { const t = await this.getIndex(); t.denied.includes(e) || t.denied.push(e), t.allowed = t.allowed.filter(n => n !== e), await this.saveIndex(t), await GM.setValue(this.PREFIX_DENY + e, !0), await GM.deleteValue(this.PREFIX_ALLOW + e), events.emit("domainListChanged") } static async removeAllowedDomain(e) { const t = await this.getIndex(); t.allowed = t.allowed.filter(n => n !== e), await this.saveIndex(t), await GM.deleteValue(this.PREFIX_ALLOW + e), events.emit("domainListChanged") } static async removeDeniedDomain(e) { const t = await this.getIndex(); t.denied = t.denied.filter(n => n !== e), await this.saveIndex(t), await GM.deleteValue(this.PREFIX_DENY + e), events.emit("domainListChanged") } static async getAllowedDomains() { const e = await this.getIndex(); return e.allowed || [] } static async getDeniedDomains() { const e = await this.getIndex(); return e.denied || [] } }
+        class UIComponents { static createButton(e, t, n) { const o = document.createElement("button"); o.className = "upb-base-button upb-button--" + t; const i = e.split(/ (.*)/s), s = i[0], a = i[1] || "", c = document.createElement("span"); c.textContent = s, a || (c.style.margin = "0"), o.appendChild(c); if (a) { const l = document.createElement("span"); l.textContent = a, o.appendChild(l) } return o.addEventListener("click", n), o } static updateDenyButtonText(e, t) { if (e) { const n = e.querySelector("span:last-child"); n && (n.textContent = `Deny (${t})`) } } }
+        class ToastNotification { constructor() { this.element = null, this.timeoutId = null } show(e) { this.element && this.hide(!0), document.body ? (this.element = document.createElement("div"), this.element.style.cssText = `position: fixed !important; bottom: 20px !important; right: 20px !important; background-color: rgba(28, 28, 30, 0.75) !important; -webkit-backdrop-filter: blur(10px) !important; backdrop-filter: blur(10px) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: white !important; padding: 10px 20px !important; border-radius: 9999px !important; z-index: 2147483647 !important; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif !important; font-size: 14px !important; box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important; opacity: 0 !important; transform: translateY(10px) !important; transition: all 0.3s ease-in-out !important;`, this.element.textContent = e, document.body.appendChild(this.element), setTimeout(() => { this.element && (this.element.style.opacity = "1", this.element.style.transform = "translateY(0)") }, 10), this.timeoutId = setTimeout(() => this.hide(), 1e3 * CONSTANTS.TOAST_TIMEOUT_SECONDS)) : window.addEventListener("DOMContentLoaded", () => this.show(e)) } hide(e = !1) { !this.element || (clearTimeout(this.timeoutId), this.timeoutId = null, e ? (this.element.parentNode && this.element.parentNode.removeChild(this.element), this.element = null) : (this.element.style.opacity = "0", this.element.style.transform = "translateY(10px)", setTimeout(() => { this.element && this.element.parentNode && this.element.parentNode.removeChild(this.element), this.element = null }, 300))) } }
+        class RedirectShield { constructor() { this.isAllowed = !1, this.handler = e => { if (!this.isAllowed) { e.preventDefault(), e.returnValue = ""; return "" } } } arm() { window.addEventListener("beforeunload", this.handler, !0) } disarm() { window.removeEventListener("beforeunload", this.handler, !0) } allowOnce(e) { this.isAllowed = !0, e(), setTimeout(() => { this.isAllowed = !1 }, 100) } }
+        class NotificationBar { constructor() { this.element = null, this.timeLeft = CONSTANTS.TIMEOUT_SECONDS, this.denyTimeoutId = null, this.denyButton = null, this.currentUrl = null } createElement() { let e = document.getElementById("upb-notification-bar"); return e || (e = document.createElement("div"), e.id = "upb-notification-bar", document.body.appendChild(e)), this.element = e, this.element } show(e) { this.element && this.element.style.display === "flex" && this.clearDenyTimeout(), this.currentUrl = e, document.body ? this.createElement() && (this.element.style.display = "flex", this.setMessage(e), this.addButtons(e), this.startDenyTimeout()) : window.addEventListener("DOMContentLoaded", () => this.show(e)) } hide() { redirectShield.disarm(), this.element && (this.clearDenyTimeout(), this.element.parentNode && this.element.parentNode.removeChild(this.element), this.element = null) } clearDenyTimeout() { this.denyTimeoutId && (clearInterval(this.denyTimeoutId), this.denyTimeoutId = null) } setMessage(e) { for (; this.element.firstChild;) this.element.removeChild(this.element.firstChild); const t = document.createElement("div"); t.className = "upb-info-section"; const n = document.createElement("img"); n.src = CONSTANTS.LOGO_SVG_URL, n.style.cssText = "width: 20px; height: 20px; flex-shrink: 0;", t.appendChild(n); const o = e || "", i = o.length > CONSTANTS.TRUNCATE_LENGTH ? `${o.substring(0,CONSTANTS.TRUNCATE_LENGTH)}..` : o, s = document.createElement("span"); s.appendChild(document.createTextNode("Blocked popup to ")); const a = document.createElement("a"); a.href = o, a.target = "_blank", a.style.cssText = "color:#64D2FF; text-decoration: none; font-weight: 500;", a.textContent = i || "an unspecified destination", s.appendChild(a), t.appendChild(s), this.element.appendChild(t) } async addButtons(e) { const t = await DomainManager.getCurrentTopDomain(), n = document.createElement("div"); n.className = "upb-button-container"; n.appendChild(UIComponents.createButton("✅ Allow Once", "allow", () => { this.hide(), redirectShield.allowOnce(() => { realWindowOpen(e) }) })), n.appendChild(UIComponents.createButton("💙 Always Allow", "trust", async () => { this.hide(), await DomainManager.addAllowedDomain(t) })), n.appendChild(UIComponents.createButton("❌ Always Deny", "deny", async () => { confirm(`Are you sure you want to permanently block popups from ${t}?`) && (this.hide(), await DomainManager.addDeniedDomain(t)) })), this.denyButton = UIComponents.createButton(`🚫 Deny (${this.timeLeft})`, "denyTemp", () => this.hide()), n.appendChild(this.denyButton), n.appendChild(UIComponents.createButton("⚙️ Config", "config", () => configModal.show())); const o = this.element.querySelector(".upb-button-container"); o && o.remove(), this.element.appendChild(n) } startDenyTimeout() { this.timeLeft = CONSTANTS.TIMEOUT_SECONDS, this.clearDenyTimeout(), UIComponents.updateDenyButtonText(this.denyButton, this.timeLeft), this.denyTimeoutId = setInterval(() => { this.timeLeft--, UIComponents.updateDenyButtonText(this.denyButton, this.timeLeft), this.timeLeft <= 0 && this.hide() }, 1e3) } }
+        class ConfigModal { constructor() { this.element = null, this.refreshListener = () => { this.element && this.refreshAllLists() }, events.on("domainListChanged", this.refreshListener) } destroy() { events.off("domainListChanged", this.refreshListener), this.hide() } hide() { this.element && (this.element.remove(), this.element = null) } show() { if (!document.body) { window.addEventListener("DOMContentLoaded", () => this.show()); return } this.element && this.hide(); this.element = this.createElement(), document.body.appendChild(this.element), this.refreshAllLists() } createElement() { const e = document.createElement("div"); e.id = "upb-config-modal"; const t = document.createElement("div"); t.id = "upb-modal-header"; const n = document.createElement("img"); n.src = CONSTANTS.LOGO_SVG_URL, n.style.cssText = "width: 24px; height: 24px;"; const o = document.createElement("span"); o.textContent = "Ultra Popup Blocker", t.appendChild(n), t.appendChild(o), e.appendChild(t); const i = document.createElement("div"); i.id = "upb-modal-content", i.appendChild(this.createListSection("Allowed Websites", "allow")), i.appendChild(this.createListSection("Denied Websites", "deny")), e.appendChild(i); const s = document.createElement("div"); return s.id = "upb-modal-footer", s.appendChild(UIComponents.createButton("Close", "neutral", () => this.hide())), e.appendChild(s), e } createListSection(e, t) { const n = document.createElement("div"); n.className = "upb-list-section"; const o = document.createElement("h3"); o.style.cssText = "margin-top: 0; margin-bottom: 10px; text-align: center; font-weight: 500;", o.textContent = e; const i = document.createElement("div"); i.style.cssText = "display: flex; gap: 8px; margin-bottom: 10px;"; const s = document.createElement("input"); s.type = "text", s.className = "upb-input", s.placeholder = "e.g., example.com"; const a = UIComponents.createButton("Add", "trust", () => this.handleAdd(t, s)); i.appendChild(s), i.appendChild(a); const c = document.createElement("ul"); return c.className = "upb-list", c.classList.add(`upb-list--${t}`), n.appendChild(o), n.appendChild(i), n.appendChild(c), s.onkeydown = e => { e.key === "Enter" && this.handleAdd(t, s) }, n } handleAdd(e, t) { const n = DomainManager.parseAndValidateDomain(t.value); n ? (t.value = "", e === "allow" ? DomainManager.addAllowedDomain(n) : DomainManager.addDeniedDomain(n)) : alert("Invalid domain format. Please enter a valid domain.") } async refreshAllLists() { if (!this.element) return; await this.populateList(this.element.querySelector(".upb-list--allow"), await DomainManager.getAllowedDomains(), "allow"); await this.populateList(this.element.querySelector(".upb-list--deny"), await DomainManager.getDeniedDomains(), "deny") } populateList(e, t, n) { for (; e.firstChild;) e.removeChild(e.firstChild); if (t.length === 0) { const o = document.createElement("li"); o.textContent = "No websites in this list.", o.style.cssText = "padding: 10px; color: #8E8E93; text-align: center;", e.appendChild(o) } else t.sort().forEach(o => { const i = document.createElement("li"); i.className = "upb-list-item"; const s = document.createElement("span"); s.textContent = o; const a = document.createElement("div"); a.className = "upb-remove-button", a.textContent = "×", a.onclick = async () => { n === "allow" ? await DomainManager.removeAllowedDomain(o) : await DomainManager.removeDeniedDomain(o) }, i.appendChild(s), i.appendChild(a), e.appendChild(i) }) } }
+        class ModalBlocker { static isModal(e) { if (!(e instanceof HTMLElement) || !document.body.contains(e) || e.offsetParent === null || getComputedStyle(e).visibility === "hidden") return !1; const t = getComputedStyle(e), n = parseInt(t.zIndex, 10) || 0; if (n < 1e3) return !1; const o = e.getBoundingClientRect(); if (o.width <= 0 || o.height <= 0) return !1; const i = window.innerWidth, s = window.innerHeight; return o.width > .8 * i && o.height > .8 * s || o.width > 300 && o.height > 200 && t.position === "fixed" || t.backgroundColor.startsWith("rgba") && parseFloat(t.backgroundColor.split(",")[3]) > .1 } static neutralize(e, t) { console.log("[UPB] Neutralizing suspected modal:", e), e.style.setProperty("display", "none", "important"), document.body.style.setProperty("overflow", "auto", "important"), document.documentElement.style.setProperty("overflow", "auto", "important"), t.show("🛡️ Modal popup hidden.") } static scan(e, t) { if (sessionStorage.getItem("upb_modal_block_disabled") === "true") return; for (const n of e) if (n.nodeType === Node.ELEMENT_NODE) { if (n.closest("#upb-notification-bar, #upb-config-modal, #upb-toast-notification")) continue; if (this.isModal(n)) this.neutralize(n, t); else { const o = n.querySelectorAll("div, form"); for (const i of o) this.isModal(i) && this.neutralize(i, t) } } } }
+        class PopupBlocker {
+            static async initialize() {
+                if (global._upbListenerCleaner) { global._upbListenerCleaner(), global._upbListenerCleaner = null }
+                const domainState = await DomainManager.getCurrentDomainState();
+                if (global._upb_toast || (global._upb_toast = new ToastNotification), domainState === "allow") { return redirectShield.disarm(), void(global.open !== realWindowOpen && (global.open = realWindowOpen), document.write = global._realDocumentWrite, document.writeln = global._realDocumentWriteln) }
+                
+                redirectShield.arm();
 
-// Reference to page's window through GreaseMonkey
-const global = unsafeWindow
-global.upbCounter = 0
+                if (domainState === "deny") { const e = global._upb_toast; global.open = () => (e.show("🚫 Popup blocked on a denied site."), FakeWindow); const t = n => { let o = !1; if (n.type === "click") { const i = n.target.closest("a"); if (i && i.href) { const s = document.querySelector('base[target="_blank"]'); o = i.target === "_blank" || s && i.target !== "_self" } } else if (n.type === "submit") { const i = n.target.closest("form"); i && i.target === "_blank" && (o = !0) } o && (n.preventDefault(), n.stopPropagation(), n.stopImmediatePropagation(), e.show("🚫 Popup blocked on a denied site.")) }; return void(window.addEventListener("click", t, !0), window.addEventListener("submit", t, !0), global._upbListenerCleaner = () => { window.removeEventListener("click", t, !0), window.removeEventListener("submit", t, !0) }) }
+                
+                const notificationBar = new NotificationBar;
+                global.open = (url) => { notificationBar.show(url); return FakeWindow; };
+                const clickBlocker = e => { if (e.target.closest("#upb-notification-bar, #upb-toast-notification")) return; const t = e.target.closest("a"); if (t && t.href) { const n = document.querySelector('base[target="_blank"]'), o = t.target === "_blank" || n && t.target !== "_self"; o && (e.preventDefault(), e.stopPropagation(), e.stopImmediatePropagation(), notificationBar.show(t.href)) } };
+                const submitListener = e => { const t = e.target.closest("form"); t && t.target === "_blank" && (e.preventDefault(), notificationBar.show(t.action || location.href)) };
+                window.addEventListener("click", clickBlocker, !0), window.addEventListener("submit", submitListener, !0), global._upbListenerCleaner = () => { window.removeEventListener("click", clickBlocker, !0), window.removeEventListener("submit", submitListener, !0) }
+            }
+        }
 
-// Store reference to original window.open
-const realWindowOpen = global.open
-
-// Fake window object to prevent JS errors
-const FakeWindow = {
-  blur: () => false,
-  focus: () => false
-}
-
-/* Domain Management */
-class DomainManager {
-  static async getCurrentTopDomain () {
-    const [domainName, topLevelDomain] = document.location.hostname.split('.').slice(-2)
-    return `${domainName}.${topLevelDomain}`
-  }
-
-  static async isCurrentDomainTrusted () {
-    const domain = await this.getCurrentTopDomain()
-    return await GM.getValue(domain)
-  }
-
-  static async addTrustedDomain (domain) {
-    await GM.setValue(domain, true)
-  }
-
-  static async removeTrustedDomain (domain) {
-    await GM.deleteValue(domain)
-  }
-
-  static async getTrustedDomains () {
-    return await GM.listValues()
-  }
-}
-
-/* UI Components */
-class UIComponents {
-  static createButton (text, id, clickHandler, color) {
-    const button = document.createElement('button')
-    button.id = `upb-${id}`
-    button.innerHTML = text
-    button.style.cssText = `${STYLES.button} color: ${color} !important;`
-    button.addEventListener('click', clickHandler)
-    return button
-  }
-
-  static createNotificationBar () {
-    const bar = document.createElement('div')
-    bar.id = 'upb-notification-bar'
-    bar.style.cssText = STYLES.notificationBar
-    return bar
-  }
-
-  static createModalElement () {
-    const modal = document.createElement('div')
-    modal.id = 'upb-trusted-domains-modal'
-    modal.style.cssText = STYLES.modal
-    return modal
-  }
-
-  static updateDenyButtonText (button, timeLeft) {
-    if (button) {
-      button.innerHTML = `🔴 Deny (${timeLeft})`
-    }
-  }
-}
-
-/* Notification Bar */
-class NotificationBar {
-  constructor () {
-    // Don't create the element in constructor
-    this.element = null
-    this.timeLeft = CONSTANTS.TIMEOUT_SECONDS
-    this.denyTimeoutId = null
-    this.denyButton = null
-  }
-
-  createElement () {
-    if (!this.element) {
-      this.element = UIComponents.createNotificationBar()
-      document.body.appendChild(this.element)
-    }
-    return this.element
-  }
-
-  show (url) {
-    if (!this.element) {
-      this.createElement()
-    }
-    this.element.style.display = 'block'
-    this.setMessage(url)
-    this.addButtons(url)
-    this.startDenyTimeout()
-  }
-
-  hide () {
-    if (this.element) {
-      this.element.style.display = 'none'
-      if (this.element.parentNode) {
-        this.element.parentNode.removeChild(this.element)
-      }
-      this.element = null
-    }
-    global.upbCounter = 0
-    this.clearDenyTimeout()
-  }
-
-  clearDenyTimeout () {
-    if (this.denyTimeoutId) {
-      clearInterval(this.denyTimeoutId)
-      this.denyTimeoutId = null
-    }
-  }
-
-  setMessage (url) {
-    const truncatedUrl = url.length > CONSTANTS.TRUNCATE_LENGTH
-      ? `${url.substring(0, CONSTANTS.TRUNCATE_LENGTH)}..`
-      : url
-
-    this.element.innerHTML = `
-      Ultra Popup Blocker: This site is attempting to open <b>${global.upbCounter}</b> popup(s).
-      <a href="${url}" style="color:yellow;">${truncatedUrl}</a>
-    `
-  }
-
-  async addButtons (url) {
-    const currentDomain = await DomainManager.getCurrentTopDomain()
-
-    // Allow Once
-    this.element.appendChild(
-      UIComponents.createButton('🟢 Allow Once', 'allow', () => {
-        realWindowOpen(url)
-        this.hide()
-      }, 'green')
-    )
-
-    // Always Allow
-    this.element.appendChild(
-      UIComponents.createButton('🔵 Always Allow', 'trust', async () => {
-        await DomainManager.addTrustedDomain(currentDomain)
-        realWindowOpen(url)
-        this.hide()
-        global.open = realWindowOpen
-      }, 'blue')
-    )
-
-    // Deny
-    this.denyButton = UIComponents.createButton('🔴 Deny (15)', 'deny', () => {
-      this.hide()
-      PopupBlocker.initialize()
-    }, 'red')
-    this.element.appendChild(this.denyButton)
-
-    // Config
-    const configButton = UIComponents.createButton('🟠 Config', 'config', () => {
-      new TrustedDomainsModal().show()
-    }, 'orange')
-    configButton.style.float = 'right'
-    this.element.appendChild(configButton)
-  }
-
-  startDenyTimeout () {
-    this.timeLeft = CONSTANTS.TIMEOUT_SECONDS
-    this.clearDenyTimeout()
-
-    // Initial update
-    UIComponents.updateDenyButtonText(this.denyButton, this.timeLeft)
-
-    this.denyTimeoutId = setInterval(() => {
-      this.timeLeft--
-      UIComponents.updateDenyButtonText(this.denyButton, this.timeLeft)
-
-      if (this.timeLeft <= 0) {
-        this.clearDenyTimeout()
-        this.hide()
-        PopupBlocker.initialize()
-      }
-    }, 1000)
-  }
-
-  resetTimeout () {
-    if (this.element && this.element.style.display === 'block') {
-      this.startDenyTimeout()
-    }
-  }
-}
-
-/* Trusted Domains Modal */
-class TrustedDomainsModal {
-  constructor () {
-    this.element = document.getElementById('upb-trusted-domains-modal') || this.createElement()
-  }
-
-  createElement () {
-    const modal = UIComponents.createModalElement()
-
-    const header = document.createElement('div')
-    header.style.cssText = STYLES.modalHeader
-    header.innerHTML = `
-      <h2 style="color:white !important;">Ultra Popup Blocker</h2>
-      <h3 style="color:white !important;text-align:left;margin-top:10px;">Trusted websites:</h3>
-    `
-    modal.appendChild(header)
-
-    const footer = document.createElement('div')
-    footer.style.cssText = STYLES.modalFooter
-
-    const closeButton = document.createElement('button')
-    closeButton.innerText = 'Close'
-    closeButton.style.cssText = `
-      background-color: #000000;
-      color: #ffffff;
-      border: none;
-      padding: 10px;
-      cursor: pointer;
-    `
-    closeButton.onclick = () => this.hide()
-
-    footer.appendChild(closeButton)
-    modal.appendChild(footer)
-
-    document.body.appendChild(modal)
-    return modal
-  }
-
-  show () {
-    this.refreshDomainsList()
-    this.element.style.display = 'block'
-  }
-
-  hide () {
-    this.element.style.display = 'none'
-  }
-
-  async refreshDomainsList () {
-    const existingList = document.getElementById('upb-domains-list')
-    if (existingList) existingList.remove()
-
-    const list = document.createElement('ul')
-    list.id = 'upb-domains-list'
-    list.style.cssText = 'margin:0;padding:0;list-style-type:none;'
-
-    const trustedDomains = await DomainManager.getTrustedDomains()
-
-    if (trustedDomains.length === 0) {
-      const message = document.createElement('p')
-      message.style.padding = '20px'
-      message.innerText = 'No allowed websites'
-      list.appendChild(message)
-    } else {
-      for (const domain of trustedDomains) {
-        await this.addDomainListItem(list, domain)
-      }
-    }
-
-    this.element.insertBefore(list, this.element.querySelector('div:last-child'))
-  }
-
-  async addDomainListItem (list, domain) {
-    const item = document.createElement('li')
-    item.style.cssText = STYLES.listItem
-    item.innerText = domain
-
-    item.addEventListener('mouseover', () => {
-      item.style.backgroundColor = '#ddd'
-    })
-    item.addEventListener('mouseout', () => {
-      item.style.backgroundColor = 'white'
-    })
-
-    const removeButton = document.createElement('span')
-    removeButton.style.cssText = STYLES.removeButton
-    removeButton.innerText = '×'
-
-    removeButton.addEventListener('mouseover', () => {
-      removeButton.style.backgroundColor = '#f44336'
-      removeButton.style.color = 'white'
-    })
-    removeButton.addEventListener('mouseout', () => {
-      removeButton.style.backgroundColor = 'transparent'
-      removeButton.style.color = 'black'
-    })
-    removeButton.addEventListener('click', async () => {
-      await DomainManager.removeTrustedDomain(domain)
-      item.remove()
-      PopupBlocker.initialize()
-    })
-
-    item.appendChild(removeButton)
-    list.appendChild(item)
-  }
-}
-
-/* Popup Blocker */
-class PopupBlocker {
-  static async initialize () {
-    if (global.open !== realWindowOpen) return
-
-    if (await DomainManager.isCurrentDomainTrusted()) {
-      const domain = await DomainManager.getCurrentTopDomain()
-      console.log(`[UPB] Trusted domain: ${domain}`)
-      global.open = realWindowOpen
-      return
-    }
-
-    const notificationBar = new NotificationBar()
-
-    global.open = (url, target, features) => {
-      global.upbCounter++
-      console.log(`[UPB] Popup blocked: ${url}`)
-      notificationBar.show(url)
-      return FakeWindow
-    }
-  }
-}
-
-/* Initialize */
-window.addEventListener('load', () => PopupBlocker.initialize())
-GM.registerMenuCommand('Ultra Popup Blocker: Trusted domains', () => new TrustedDomainsModal().show())
+        const configModal = new ConfigModal;
+        const redirectShield = new RedirectShield;
+        function debounce(e, t) { let n; return function(...o) { const i = this; clearTimeout(n), n = setTimeout(() => e.apply(i, o), t) } }
+        const reinitializeDebounced = debounce(PopupBlocker.initialize, CONSTANTS.DEBOUNCE_MS);
+        const observer = new MutationObserver(mutations => { const addedNodes = mutations.flatMap(m => Array.from(m.addedNodes)); if (addedNodes.length > 0) { sessionStorage.getItem("upb_modal_block_disabled") !== "true" && ModalBlocker.scan(addedNodes, global._upb_toast || new ToastNotification), reinitializeDebounced() } });
+        function startObserver() { document.body ? observer.observe(document.body, { childList: !0, subtree: !0 }) : window.addEventListener("DOMContentLoaded", () => { observer.observe(document.body, { childList: !0, subtree: !0 }) }, { once: !0 }) }
+        
+        GM.registerMenuCommand("Ultra Popup Blocker: Configure", () => configModal.show());
+        GM.registerMenuCommand("Disable Modal Blocker (1 Tab)", () => { sessionStorage.setItem("upb_modal_block_disabled", "true"); const e = new ToastNotification; e.show("Modal blocker disabled for this tab.") });
+        events.on("domainListChanged", PopupBlocker.initialize);
+        
+        (async () => {
+            await DomainManager.runMigration();
+            await PopupBlocker.initialize();
+            startObserver();
+        })()
+    } catch (e) { console.error("[UPB] A critical error occurred. Please report this on GitHub.", e) }
+})();
