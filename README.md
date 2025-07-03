@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-    <img src="https://img.shields.io/badge/version-5.0-blue.svg" alt="Version 5.0">
+    <img src="https://img.shields.io/badge/version-5.1.1-blue.svg" alt="Version 5.1.1">
     <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License MIT">
     <a href="https://github.com/1Tdd/ultra-popup-blocker/issues">
         <img src="https://img.shields.io/github/issues/1Tdd/ultra-popup-blocker" alt="GitHub issues">
