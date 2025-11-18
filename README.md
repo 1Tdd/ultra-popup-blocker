@@ -1,99 +1,91 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/1Tdd/ultra-popup-blocker/main/img/upb_logo.svg" alt="Ultra Popup Blocker Logo" width="150">
-</p>
+<div align="center">
 
-<h1 align="center">Ultra Popup Blocker (Enhanced Edition)</h1>
+<img src="https://raw.githubusercontent.com/1Tdd/ultra-popup-blocker/main/img/upb_logo.svg" width="100" height="100" alt="UPB Logo">
 
-<p align="center">
-  <strong>The popup blocker, re-engineered for the modern web.</strong>
-  <br>
-  A powerful, intelligent, and elegant userscript that defeats the most aggressive popups, modals, and redirects while providing a seamless user experience.
-</p>
+# Ultra Popup Blocker
+### The Universal Solution for a Cleaner Web
 
-<p align="center">
-    <img src="https://img.shields.io/badge/version-5.1.1-blue.svg" alt="Version 5.1.1">
-    <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License MIT">
-    <a href="https://github.com/1Tdd/ultra-popup-blocker/issues">
-        <img src="https://img.shields.io/github/issues/1Tdd/ultra-popup-blocker" alt="GitHub issues">
-    </a>
-</p>
+[![Version](https://img.shields.io/badge/version-6.0-007AFF.svg?style=for-the-badge)](https://github.com/1Tdd/ultra-popup-blocker/releases)
+[![License](https://img.shields.io/badge/license-MIT-34C759.svg?style=for-the-badge)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Universal-5856D6.svg?style=for-the-badge)]()
 
----
+<br>
 
-## 🚀 Installation
+**Ultra Popup Blocker (UPB)** is a lightweight, high-performance userscript designed to neutralize modern popup techniques, redirects, and overlay advertisements. Built with a state-of-the-art interception engine, it operates silently in the background, protecting your browsing experience without breaking legitimate websites.
 
-1.  **Install a Userscript Manager:** You need a browser extension like [Tampermonkey](https://www.tampermonkey.net/) (recommended for Chrome) or [Violentmonkey](https://violentmonkey.github.io/) (recommended for Firefox).
-2.  **Install the Script:** Click the link below to install the latest version directly from GitHub. Your userscript manager will prompt you to confirm the installation.
+[**💿 Install Now**](https://github.com/1Tdd/ultra-popup-blocker/releases/latest/download/ultra-popup-blocker.user.js) &nbsp;&nbsp;&nbsp; [**🐞 Report Bug**](https://github.com/1Tdd/ultra-popup-blocker/issues)
 
-    <p align="center">
-      <a href="https://github.com/1Tdd/ultra-popup-blocker/releases/latest/download/ultra-popup-blocker.user.js">
-        <img src="https://img.shields.io/badge/-Install_Latest_Release-brightgreen?style=for-the-badge&logo=tampermonkey" alt="Install Latest Release">
-      </a>
-    </p>
+</div>
 
 ---
 
-## 🌟 What Makes This the *Enhanced* Edition?
+## ✨ Key Highlights
 
-This script began with the solid foundation of [Eskander's original Ultra Popup Blocker](https://github.com/Eskander/ultra-popup-blocker). This new version, completely re-architected by **1Tdd**, elevates it with powerful new features and a modern architecture to meet the challenges of today's web.
+### 🎨 Apple-Inspired Glassmorphism UI
+A stunning, blur-backed interface that feels native to modern operating systems. It adapts intelligently to your device:
+*   **Desktop:** A sleek, unobtrusive notification bar.
+*   **Mobile:** A touch-optimized control grid designed for thumbs.
 
-Here’s a comparison of the key enhancements:
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/1db69d47-818a-4e10-8d22-3b761fd324f9" alt="Ultra Popup Blocker UI Preview" width="100%" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+  <br><em>(The responsive interface adapting to user interaction)</em>
+</div>
 
-| Feature                            | Original by Eskander | Enhanced Edition by 1Tdd                                                              |
-| ---------------------------------- | :------------------: | :--------------------------------------------------------------------------------------: |
-| **User Interface**                 | Standard Browser UI  | ✨ **Sleek "Glassmorphism" UI** inspired by modern design |
-| **Modal & Overlay Blocking**       | Not available        | 🛡️ **Heuristic engine** that detects and neutralizes annoying modal dialogs            |
-| **Redirect Protection**            | Not available        | ⚔️ **Powerful `beforeunload` shield** that stops popups from hijacking your main page    |
-| **SPA Compatibility**              | Limited              | 🔄 **Full support for modern sites** (Google, Facebook, etc.) via `MutationObserver`   |
-| **Storage System**                 | Standard GM Storage  | 🧠 **Resilient, self-indexed storage** that works even on highly restrictive sites   |
-| **Configuration**                  | Basic                | ⚙️ **Centralized panel** to manage all allowed/denied sites                               |
+### 🛡️ Advanced Security Core (v6.0)
+*   **The "Black Hole" Proxy:** Uses a recursive `FakeWindow` proxy that absorbs detection attempts. It tricks anti-adblock scripts into thinking a popup opened successfully, preventing site breakage while keeping the popup blocked.
+*   **State-Caching Architecture:** Domain status checks are now **O(1)** (instant). Zero lag, even on the heaviest web pages.
+*   **CSP Compliance:** Strict "No `innerHTML`" policy ensuring compatibility with security-hardened websites (like GitHub, Twitter, banking sites).
 
----
-
-## ✨ Core Features
-
-### Intelligent 3-State Logic
-You are always in control. For every website, you can choose to:
--   🔵 **Allow:** Let all popups through. Perfect for sites you trust.
--   🔴 **Deny:** Silently block all popups without any notification. Ideal for websites you never want to be interrupted by again.
--   ❔ **Ask (Default):** The script blocks the popup and presents a beautiful, non-intrusive notification bar, asking you what to do.
-
-### Advanced Blocking Engine
--   **Window Popups:** Intercepts `window.open` calls, distinguishing between user-initiated actions and aggressive scripts.
--   **Tab Opening Links:** Blocks links and forms designed to open in a new tab (`target="_blank"`).
--   **Modal & Overlay Blocking:** Detects and hides annoying elements that cover the page, like newsletter signups and cookie banners, while automatically re-enabling page scrolling.
--   **Redirect Protection:** A powerful shield activates when a popup is blocked, preventing the original page from being redirected to an unwanted site.
-
-### Modern & User-Friendly
--   **Sleek "Glass" UI:** A beautiful, dark-mode, glassmorphism interface for all notifications and configuration panels.
--   **Custom Logo & Icons:** A polished and professional look and feel.
--   **Escape Hatch:** If our modal blocker ever gets in the way of a legitimate login window, use the "Disable Modal Blocker (1 Tab)" command from your userscript manager's menu to temporarily pause it.
+### ⚡ Intelligent Defense Layers
+1.  **Trap:** Intercepts `window.open`, `target="_blank"`, and simulated mouse events.
+2.  **Shield:** Monitors `beforeunload` events to prevent sites from redirecting your current tab in retaliation for a blocked popup.
+3.  **Filter:** Distinguishes between malicious popups and legitimate user actions (like `download` links).
 
 ---
 
-## 📸 A Glimpse of the UI
+## 📦 Installation
 
-<p align="center">
-  <strong>The clean and intuitive configuration panel:</strong>
-  <br>
-  <img src="https://github.com/user-attachments/assets/1db69d47-818a-4e10-8d22-3b761fd324f9" alt="Configuration Panel Screenshot" width="600">
-</p>
+### Step 1: Get a Userscript Manager
+You need a browser extension to run this script.
+*   **Desktop (Chrome, Firefox, Edge):** [Tampermonkey](https://www.tampermonkey.net/) or [Violentmonkey](https://violentmonkey.github.io/).
+*   **Android:** Firefox Nightly or Kiwi Browser with Tampermonkey.
+*   **iOS (iPhone/iPad):** The "Userscripts" extension for Safari.
 
-<p align="center">
-  <strong>The non-intrusive notification bar in action:</strong>
-  <br>
-  <img src="https://github.com/user-attachments/assets/3df24748-76b1-41aa-b6ec-121bb1f33337" alt="Notification Bar Screenshot" width="700">
-</p>
+### Step 2: Install the Script
+Click the button below. Your manager will ask for confirmation.
+
+<div align="center">
+
+[![Install Ultra Popup Blocker](https://img.shields.io/badge/⬇_INSTALL_SCRIPT-Click_Here-007AFF.svg?style=for-the-badge&logo=tampermonkey)](https://github.com/1Tdd/ultra-popup-blocker/releases/latest/download/ultra-popup-blocker.user.js)
+
+</div>
 
 ---
 
-## 🔧 How to Use
+## ⚙️ How to Use
 
-*   **The Notification Bar:** When a popup is blocked, a sleek bar will appear at the bottom of the screen with clear options.
-*   **Configuration Panel:** Access the configuration panel from the "⚙️ Config" button on the notification bar, or through the Tampermonkey menu. Here you can manually add, view, and remove sites from your Allowed and Denied lists.
-*   **Toast Notifications:** When on a "Denied" site or when a modal is hidden, you'll receive a discreet, temporary notification in the bottom-right corner.
+UPB works out of the box. When a popup is blocked, you are in control:
 
-## ❤️ Credits & Thanks
+| Action | Description |
+| :--- | :--- |
+| **✅ Allow Once** | Opens the blocked popup just this one time. Useful for login windows. |
+| **💙 Trust Site** | Whitelists the domain. Popups will never be blocked here again. |
+| **❌ Block Site** | Adds the domain to the **Deny List**. Future attempts will be blocked silently (with a subtle toast notification). |
+| **⚙️ Config** | Opens the dashboard to manage your Allowed/Denied lists. |
 
-*   **1Tdd** - Lead developer of the Enhanced Edition.
-*   **Eskander** - For creating the original, foundational Ultra Popup Blocker.
+> **Pro Tip:** On mobile devices, the inputs are optimized to prevent auto-correct and auto-capitalization, making domain entry frustration-free.
+
+---
+
+## 📜 Credits & Acknowledgments
+
+This project is an evolution of the original concept, rebuilt for the modern web.
+
+*   **Lead Developer:** [1Tdd](https://github.com/1Tdd) - Core architecture rewrite, UI design, mobile optimization, and stealth systems.
+*   **Original Inspiration:** [Eskander](https://github.com/Eskander) - Author of the original *Popup Blocker Script*, whose foundational logic paved the way for this enhanced edition.
+
+---
+
+<div align="center">
+<sub>Distributed under the MIT License. Code is provided "as is" without warranty.</sub>
+</div>
