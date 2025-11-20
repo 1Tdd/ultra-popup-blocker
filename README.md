@@ -5,7 +5,7 @@
 # Ultra Popup Blocker
 ### The Universal Solution for a Cleaner Web
 
-[![Version](https://img.shields.io/badge/version-6.0-007AFF.svg?style=for-the-badge)](https://github.com/1Tdd/ultra-popup-blocker/releases)
+[![Version](https://img.shields.io/badge/version-2.0-007AFF.svg?style=for-the-badge)](https://github.com/1Tdd/ultra-popup-blocker/releases)
 [![License](https://img.shields.io/badge/license-MIT-34C759.svg?style=for-the-badge)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Universal-5856D6.svg?style=for-the-badge)]()
 
@@ -31,15 +31,17 @@ A stunning, blur-backed interface that feels native to modern operating systems.
   <br><em>(The responsive interface adapting to user interaction)</em>
 </div>
 
-### 🛡️ Advanced Security Core (v6.0)
+### 🛡️ Advanced Security Core (v2.0)
 *   **The "Black Hole" Proxy:** Uses a recursive `FakeWindow` proxy that absorbs detection attempts. It tricks anti-adblock scripts into thinking a popup opened successfully, preventing site breakage while keeping the popup blocked.
 *   **State-Caching Architecture:** Domain status checks are now **O(1)** (instant). Zero lag, even on the heaviest web pages.
+*   **Strict Mode:** New option to block ALL popups by default, providing maximum protection.
 *   **CSP Compliance:** Strict "No `innerHTML`" policy ensuring compatibility with security-hardened websites (like GitHub, Twitter, banking sites).
 
 ### ⚡ Intelligent Defense Layers
-1.  **Trap:** Intercepts `window.open`, `target="_blank"`, and simulated mouse events.
+1.  **Trap:** Intercepts `window.open`, `target="_blank"`, and simulated mouse events (including middle-click).
 2.  **Shield:** Monitors `beforeunload` events to prevent sites from redirecting your current tab in retaliation for a blocked popup.
 3.  **Filter:** Distinguishes between malicious popups and legitimate user actions (like `download` links).
+4.  **Configurable:** Toggle notifications or enable Strict Mode directly from the settings.
 
 ---
 

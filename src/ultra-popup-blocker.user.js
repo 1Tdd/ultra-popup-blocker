@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Ultra Popup Blocker
+// @name         Ultra Popup Blocker v2
 // @description  A sleek, modern popup blocker with an Apple-inspired glassmorphism UI and advanced redirect protection.
 // @namespace    https://github.com/1Tdd
 // @author       1Tdd
-// @version      6.0
+// @version      2.0
 // @include      *
 // @license      MIT
 // @homepage     https://github.com/1Tdd/ultra-popup-blocker
@@ -18,21 +18,32 @@
 // @grant        GM.registerMenuCommand
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
-    const C = {
-        TIMEOUT: 15,
-        TOAST_TIME: 2500,
-        MODAL_W_PC: '550px',
-        LOGO: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJhdXJvcmEtZ3JhZGllbnQiIHgxPSIwJSIgeTE9IjEwMCUiIHgyPSIxMDAlIiB5Mj0iMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM1ODU2RDYiLz48c3RvcCBvZmZzZXQ9IjUwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGMkQ1NSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGOTgwQSIvPjwvbGluZWFyR3JhZGllbnQ+PG1hc2sgaWQ9InRleHQtbWFzayI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IndoaXRlIiAvPjx0ZXh0IHg9IjUwJSIgeT0iNTMlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgQmxpbmtNYWNTeXN0Rm9udCwgJ1NlZ29lIFVJJywgUm9ib3RvLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjQwIiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iYmxhY2siPlVQQjwvdGV4dD48L21hc2s+PC9kZWZzPjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiByeD0iMjIiIGZpbGw9IiMwMDAwMDAiIC8+PHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iODAiIGhlaWdodD0iODAiIHJ4PSIyMiIgZmlsbD0idXJsKCNhdXJvcmEtZ3JhZGllbnQpIiBtYXNrPSJ1cmwoI3RleHQtbWFzaykiIC8+PC9zdmc+"
+    /**
+     * Constants and Configuration
+     */
+    const CONSTANTS = {
+        TIMEOUT_SECONDS: 15,
+        TOAST_DURATION_MS: 2500,
+        MODAL_WIDTH_PC: '550px',
+        LOGO_SVG: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJhdXJvcmEtZ3JhZGllbnQiIHgxPSIwJSIgeTE9IjEwMCUiIHgyPSIxMDAlIiB5Mj0iMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM1ODU2RDYiLz48c3RvcCBvZmZzZXQ9IjUwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGMkQ1NSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGOTgwQSIvPjwvbGluZWFyR3JhZGllbnQ+PG1hc2sgaWQ9InRleHQtbWFzayI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IndoaXRlIiAvPjx0ZXh0IHg9IjUwJSIgeT0iNTMlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgQmxpbmtNYWNTeXN0Rm9udCwgJ1NlZ29lIFVJJywgUm9ib3RvLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjQwIiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iYmxhY2siPlVQQjwvdGV4dD48L21hc2s+PC9kZWZzPjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiByeD0iMjIiIGZpbGw9IiMwMDAwMDAiIC8+PHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iODAiIGhlaWdodD0iODAiIHJ4PSIyMiIgZmlsbD0idXJsKCNhdXJvcmEtZ3JhZGllbnQpIiBtYXNrPSJ1cmwoI3RleHQtbWFzaykiIC8+PC9zdmc+",
+        STORAGE_KEYS: {
+            ALL: "allow_",
+            DEN: "deny_",
+            IDX: "upb_idx_v7",
+            CONFIG: "upb_config"
+        }
     };
 
-    const global = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
-    const realOpen = global.open;
+    const globalScope = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
+    const originalOpen = globalScope.open;
 
-    // --- RESPONSIVE CSS ---
-    const CSS = `
+    /**
+     * CSS Styles
+     */
+    const STYLES = `
         .upb-btn{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;padding:10px 20px!important;border-radius:12px!important;border:1px solid rgba(255,255,255,.1)!important;font-size:14px!important;font-weight:600!important;cursor:pointer!important;transition:all .2s ease-out!important;line-height:1.2!important;outline:0!important;white-space:nowrap!important}
         .upb-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}.upb-btn:active{transform:scale(.96);filter:brightness(.95)}
         .upb-allow{background:linear-gradient(to right,#24D169,#23C15D)!important;color:#003D11!important;border:0!important}
@@ -44,7 +55,7 @@
         
         #upb-bar{position:fixed!important;bottom:20px!important;left:50%!important;transform:translateX(-50%)!important;z-index:2147483647!important;width:auto!important;max-width:95%!important;padding:12px!important;border-radius:20px!important;display:none;align-items:center!important;gap:15px!important;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif!important;font-size:14px!important;color:#F5F5F7!important;background:rgba(28,28,30,.85)!important;-webkit-backdrop-filter:blur(25px)!important;backdrop-filter:blur(25px)!important;border:1px solid rgba(255,255,255,.15)!important;box-shadow:0 12px 40px 0 rgba(0,0,0,.4),inset 0 0 0 1px rgba(255,255,255,.15)}
         
-        #upb-modal{position:fixed!important;top:50%!important;left:50%!important;transform:translate(-50%,-50%)!important;width:${C.MODAL_W_PC}!important;z-index:2147483647!important;border-radius:24px!important;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif!important;color:#F5F5F7!important;background:rgba(28,28,30,.9)!important;-webkit-backdrop-filter:blur(25px)!important;backdrop-filter:blur(25px)!important;border:1px solid rgba(255,255,255,.15)!important;box-shadow:0 12px 40px 0 rgba(0,0,0,.4);overflow:hidden!important;display:flex;flex-direction:column;max-height:90vh!important}
+        #upb-modal{position:fixed!important;top:50%!important;left:50%!important;transform:translate(-50%,-50%)!important;width:${CONSTANTS.MODAL_WIDTH_PC}!important;z-index:2147483647!important;border-radius:24px!important;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif!important;color:#F5F5F7!important;background:rgba(28,28,30,.9)!important;-webkit-backdrop-filter:blur(25px)!important;backdrop-filter:blur(25px)!important;border:1px solid rgba(255,255,255,.15)!important;box-shadow:0 12px 40px 0 rgba(0,0,0,.4);overflow:hidden!important;display:flex;flex-direction:column;max-height:90vh!important}
         
         #upb-head{padding:16px!important;text-align:center!important;font-size:18px!important;font-weight:600!important;border-bottom:1px solid rgba(255,255,255,.15)!important;background:rgba(255,255,255,.05)!important;display:flex;align-items:center;justify-content:center;gap:10px}
         #upb-body{padding:20px!important;display:flex!important;justify-content:space-between!important;gap:20px!important;overflow-y:auto}
@@ -61,6 +72,15 @@
         .upb-info{display:flex;align-items:center;gap:15px}
         .upb-toast{position:fixed!important;bottom:20px!important;right:20px!important;background:rgba(28,28,30,.75)!important;-webkit-backdrop-filter:blur(10px)!important;backdrop-filter:blur(10px)!important;border:1px solid rgba(255,255,255,.1)!important;color:#fff!important;padding:10px 20px!important;border-radius:99px!important;z-index:2147483647!important;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif!important;font-size:14px!important;box-shadow:0 4px 20px rgba(0,0,0,.4)!important;transition:all .3s ease-in-out!important;pointer-events:none!important}
 
+        .upb-toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .upb-toggle-label { font-size: 14px; }
+        .upb-toggle-switch { position: relative; display: inline-block; width: 40px; height: 24px; }
+        .upb-toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .upb-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(120,120,128,0.32); transition: .4s; border-radius: 34px; }
+        .upb-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        input:checked + .upb-slider { background-color: #30D158; }
+        input:checked + .upb-slider:before { transform: translateX(16px); }
+
         /* MOBILE OPTIMIZATION */
         @media (max-width: 700px) {
             #upb-bar { flex-direction: column !important; width: 90% !important; padding: 15px !important; bottom: 15px !important; align-items: stretch !important; gap: 12px !important; }
@@ -73,274 +93,530 @@
         }
     `;
 
-    // --- THE "BLACK HOLE" FAKE WINDOW (Indestructible) ---
+    /**
+     * Enhanced FakeWindow Proxy
+     * Mimics a real window object to fool anti-adblock scripts.
+     */
     const FakeWindow = (() => {
-        const p = {
-            get: (t, r) => r === "closed" ? true : new Proxy(function() {}, p),
-            set: () => true,
-            apply: () => undefined
+        const handler = {
+            get: (target, prop) => {
+                if (prop === 'closed') return true; // Always appear closed to some checks
+                if (prop === 'opener') return globalScope; // Mimic opener
+                if (typeof prop === 'string' && prop.startsWith('on')) return null; // Event handlers
+
+                // Recursive proxy for nested properties (e.g., document.write)
+                return new Proxy(function () { }, handler);
+            },
+            set: () => true, // Absorb all writes
+            apply: () => undefined, // Absorb all function calls
+            construct: () => new Proxy({}, handler) // Absorb constructor calls
         };
-        return new Proxy(function() {}, p)
+        return new Proxy(function () { }, handler);
     })();
 
+    /**
+     * Event Bus
+     */
     const Events = {
-        ls: {},
-        on(e, f) { (this.ls[e] = this.ls[e] || []).push(f) },
-        emit(e, d) { if (this.ls[e]) this.ls[e].forEach(f => f(d)) }
+        listeners: {},
+        on(event, callback) { (this.listeners[event] = this.listeners[event] || []).push(callback); },
+        emit(event, data) { if (this.listeners[event]) this.listeners[event].forEach(cb => cb(data)); }
     };
 
-    class DomainMgr {
-        static K = { ALL: "allow_", DEN: "deny_", IDX: "upb_idx_v6" };
-        static async getIdx() { const d = await GM.getValue(this.K.IDX); return (d && d.a) ? d : { a: [], d: [] }; }
-        static parse(u) {
+    /**
+     * Domain Manager
+     * Handles allowing/denying domains and storage.
+     */
+    class DomainManager {
+        static async getIndex() {
+            const data = await GM.getValue(CONSTANTS.STORAGE_KEYS.IDX);
+            return (data && data.a) ? data : { a: [], d: [] };
+        }
+
+        static async getConfig() {
+            const defaults = { strictMode: false, notifications: true };
+            const config = await GM.getValue(CONSTANTS.STORAGE_KEYS.CONFIG);
+            return { ...defaults, ...config };
+        }
+
+        static async setConfig(newConfig) {
+            const current = await this.getConfig();
+            await GM.setValue(CONSTANTS.STORAGE_KEYS.CONFIG, { ...current, ...newConfig });
+            Events.emit("configChange");
+        }
+
+        static parseDomain(url) {
             try {
-                let h = u.includes("//") ? new URL(u).hostname : u;
-                h = h.trim().toLowerCase().replace(/^www\./, '');
-                if (!h.includes('.')) return null;
-                const p = h.split('.');
-                return (p.length > 2 && ["co.uk", "com.au", "com.br", "gov.uk", "ac.uk", "co.jp"].includes(p.slice(-2).join('.'))) ? p.slice(-3).join('.') : p.slice(-2).join('.');
+                let hostname = url.includes("//") ? new URL(url).hostname : url;
+                hostname = hostname.trim().toLowerCase().replace(/^www\./, '');
+                if (!hostname.includes('.')) return null;
+
+                // Basic TLD handling - can be improved with a public suffix list if needed,
+                // but for a userscript, this heuristic is usually sufficient.
+                const parts = hostname.split('.');
+                const longTLDs = ["co.uk", "com.au", "com.br", "gov.uk", "ac.uk", "co.jp", "ne.jp"];
+
+                if (parts.length > 2 && longTLDs.includes(parts.slice(-2).join('.'))) {
+                    return parts.slice(-3).join('.');
+                }
+                return parts.slice(-2).join('.');
             } catch { return null; }
         }
-        static async state(d) {
-            if (!d) return "ask";
-            if (await GM.getValue(this.K.ALL + d)) return "allow";
-            if (await GM.getValue(this.K.DEN + d)) return "deny";
+
+        static async getDomainState(domain) {
+            if (!domain) return "ask";
+
+            // Check exact match first
+            if (await GM.getValue(CONSTANTS.STORAGE_KEYS.ALL + domain)) return "allow";
+            if (await GM.getValue(CONSTANTS.STORAGE_KEYS.DEN + domain)) return "deny";
+
+            // Check config for strict mode
+            const config = await this.getConfig();
+            if (config.strictMode) return "deny";
+
             return "ask";
         }
-        static async mod(d, t) {
-            const i = await this.getIdx();
-            i.a = i.a.filter(x => x !== d);
-            i.d = i.d.filter(x => x !== d);
-            await GM.deleteValue(this.K.ALL + d);
-            await GM.deleteValue(this.K.DEN + d);
-            
-            if (t === 'allow') { i.a.push(d); await GM.setValue(this.K.ALL + d, 1); }
-            else if (t === 'deny') { i.d.push(d); await GM.setValue(this.K.DEN + d, 1); }
-            
-            await GM.setValue(this.K.IDX, i);
+
+        static async modifyDomain(domain, type) {
+            const index = await this.getIndex();
+
+            // Remove from both lists first to ensure no duplicates
+            index.a = index.a.filter(x => x !== domain);
+            index.d = index.d.filter(x => x !== domain);
+
+            await GM.deleteValue(CONSTANTS.STORAGE_KEYS.ALL + domain);
+            await GM.deleteValue(CONSTANTS.STORAGE_KEYS.DEN + domain);
+
+            if (type === 'allow') {
+                index.a.push(domain);
+                await GM.setValue(CONSTANTS.STORAGE_KEYS.ALL + domain, 1);
+            } else if (type === 'deny') {
+                index.d.push(domain);
+                await GM.setValue(CONSTANTS.STORAGE_KEYS.DEN + domain, 1);
+            }
+
+            await GM.setValue(CONSTANTS.STORAGE_KEYS.IDX, index);
             Events.emit("change");
         }
     }
 
-    const mkBtn = (txt, cls, fn) => {
-        const b = document.createElement("button");
-        b.className = `upb-btn upb-${cls}`;
-        const [t1, t2] = txt.split(/ (.*)/s);
-        b.innerHTML = `<span>${t1}</span>${t2 ? `<span>${t2}</span>` : ''}`;
-        b.onclick = fn;
-        return b;
+    /**
+     * UI Utilities
+     */
+    const createButton = (text, className, onClick) => {
+        const btn = document.createElement("button");
+        btn.className = `upb-btn upb-${className}`;
+        const [t1, t2] = text.split(/ (.*)/s);
+        btn.innerHTML = `<span>${t1}</span>${t2 ? `<span>${t2}</span>` : ''}`;
+        btn.onclick = onClick;
+        return btn;
     };
 
+    /**
+     * Toast Notification
+     */
     class Toast {
-        constructor() { this.el = null; this.tm = null; }
-        show(m) {
-            if (this.el) this.el.remove();
+        constructor() { this.element = null; this.timer = null; }
+
+        async show(message) {
+            const config = await DomainManager.getConfig();
+            if (!config.notifications) return;
+
+            if (this.element) this.element.remove();
             if (!document.body) return;
-            this.el = document.createElement("div");
-            this.el.className = "upb-toast";
-            this.el.textContent = m;
-            this.el.style.opacity = "0";
-            this.el.style.transform = "translateY(10px)";
-            document.body.appendChild(this.el);
-            requestAnimationFrame(() => { if(this.el) { this.el.style.opacity="1"; this.el.style.transform="translateY(0)"; }});
-            this.tm = setTimeout(() => { if(this.el) this.el.remove(); this.el = null; }, C.TOAST_TIME);
+
+            this.element = document.createElement("div");
+            this.element.className = "upb-toast";
+            this.element.textContent = message;
+            this.element.style.opacity = "0";
+            this.element.style.transform = "translateY(10px)";
+
+            document.body.appendChild(this.element);
+
+            requestAnimationFrame(() => {
+                if (this.element) {
+                    this.element.style.opacity = "1";
+                    this.element.style.transform = "translateY(0)";
+                }
+            });
+
+            this.timer = setTimeout(() => {
+                if (this.element) this.element.remove();
+                this.element = null;
+            }, CONSTANTS.TOAST_DURATION_MS);
         }
     }
 
-    class Notify {
-        constructor() { this.el = null; this.tm = null; this.cnt = C.TIMEOUT; }
+    /**
+     * Action Bar (Bottom Bar)
+     */
+    class NotificationBar {
+        constructor() {
+            this.element = null;
+            this.timer = null;
+            this.count = CONSTANTS.TIMEOUT_SECONDS;
+        }
+
         show(url) {
-            if (!this.el) {
-                this.el = document.createElement("div");
-                this.el.id = "upb-bar";
-                document.body.appendChild(this.el);
+            if (!this.element) {
+                this.element = document.createElement("div");
+                this.element.id = "upb-bar";
+                document.body.appendChild(this.element);
             }
-            this.cnt = C.TIMEOUT;
-            if (this.tm) clearInterval(this.tm);
-            
-            this.el.style.display = "flex";
-            this.el.innerHTML = '';
+
+            this.count = CONSTANTS.TIMEOUT_SECONDS;
+            if (this.timer) clearInterval(this.timer);
+
+            this.element.style.display = "flex";
+            this.element.innerHTML = '';
             Shield.arm();
 
-            const t = DomainMgr.parse(location.hostname);
-            const dBtn = mkBtn(`🚫 Deny (${this.cnt})`, "denyTemp", () => this.hide());
+            const domain = DomainManager.parseDomain(location.hostname);
+            const denyBtn = createButton(`🚫 Deny (${this.count})`, "denyTemp", () => this.hide());
 
             const info = document.createElement("div");
             info.className = "upb-info";
-            info.innerHTML = `<img src="${C.LOGO}" style="width:20px;height:20px"><span>Blocked popup to <a href="${url}" target="_blank" style="color:#64D2FF;text-decoration:none">${url.length>40?url.substring(0,40)+'...':url}</a></span>`;
+            info.innerHTML = `<img src="${CONSTANTS.LOGO_SVG}" style="width:20px;height:20px"><span>Blocked popup to <a href="${url}" target="_blank" style="color:#64D2FF;text-decoration:none">${url.length > 40 ? url.substring(0, 40) + '...' : url}</a></span>`;
 
-            const act = document.createElement("div");
-            act.className = "upb-actions";
-            act.append(
-                mkBtn("✅ Allow Once", "allow", () => { this.hide(); Shield.pass(() => realOpen(url)); }),
-                mkBtn("💙 Trust", "trust", () => { this.hide(); DomainMgr.mod(t, 'allow'); }),
-                mkBtn("❌ Block", "deny", () => { if(confirm(`Permanently block ${t}?`)) { this.hide(); DomainMgr.mod(t, 'deny'); } }),
-                dBtn,
-                mkBtn("⚙️", "neutral", () => Conf.show())
+            const actions = document.createElement("div");
+            actions.className = "upb-actions";
+            actions.append(
+                createButton("✅ Allow Once", "allow", () => {
+                    this.hide();
+                    Shield.pass(() => originalOpen(url));
+                }),
+                createButton("💙 Trust", "trust", () => {
+                    this.hide();
+                    DomainManager.modifyDomain(domain, 'allow');
+                }),
+                createButton("❌ Block", "deny", () => {
+                    if (confirm(`Permanently block ${domain}?`)) {
+                        this.hide();
+                        DomainManager.modifyDomain(domain, 'deny');
+                    }
+                }),
+                denyBtn,
+                createButton("⚙️", "neutral", () => ConfigUI.show())
             );
 
-            this.el.append(info, act);
-            
-            this.tm = setInterval(() => {
-                this.cnt--;
-                dBtn.querySelector("span:last-child").textContent = `Deny (${this.cnt})`;
-                if (this.cnt <= 0) this.hide();
+            this.element.append(info, actions);
+
+            this.timer = setInterval(() => {
+                this.count--;
+                const span = denyBtn.querySelector("span:last-child");
+                if (span) span.textContent = `Deny (${this.count})`;
+                if (this.count <= 0) this.hide();
             }, 1000);
         }
+
         hide() {
             Shield.disarm();
-            if (this.tm) clearInterval(this.tm);
-            if (this.el) { this.el.remove(); this.el = null; }
+            if (this.timer) clearInterval(this.timer);
+            if (this.element) {
+                this.element.remove();
+                this.element = null;
+            }
         }
     }
 
-    class Config {
-        constructor() { this.el = null; Events.on("change", () => this.el && this.fresh()); }
+    /**
+     * Configuration UI
+     */
+    class ConfigManager {
+        constructor() {
+            this.element = null;
+            Events.on("change", () => this.element && this.refreshLists());
+            Events.on("configChange", () => this.element && this.refreshConfig());
+        }
+
         show() {
-            if (this.el) return this.hide();
-            this.el = document.createElement("div");
-            this.el.id = "upb-modal";
-            this.el.innerHTML = `<div id="upb-head"><img src="${C.LOGO}" style="width:24px">Ultra Popup Blocker</div><div id="upb-body"></div><div id="upb-foot"></div>`;
-            const b = this.el.querySelector("#upb-body");
-            b.append(this.col("Allowed", "allow"), this.col("Denied", "deny"));
-            this.el.querySelector("#upb-foot").appendChild(mkBtn("Close", "neutral", () => this.hide()));
-            document.body.appendChild(this.el);
-            this.fresh();
-            this.esc = e => { if(e.key==='Escape') this.hide(); };
-            window.addEventListener('keydown', this.esc);
+            if (this.element) return this.hide();
+
+            this.element = document.createElement("div");
+            this.element.id = "upb-modal";
+            this.element.innerHTML = `
+                <div id="upb-head"><img src="${CONSTANTS.LOGO_SVG}" style="width:24px">Ultra Popup Blocker</div>
+                <div style="padding: 0 20px;">
+                    <div class="upb-toggle-row">
+                        <span class="upb-toggle-label">Strict Mode (Block All by Default)</span>
+                        <label class="upb-toggle-switch">
+                            <input type="checkbox" id="upb-strict-mode">
+                            <span class="upb-slider"></span>
+                        </label>
+                    </div>
+                    <div class="upb-toggle-row">
+                        <span class="upb-toggle-label">Show Toast Notifications</span>
+                        <label class="upb-toggle-switch">
+                            <input type="checkbox" id="upb-notifications">
+                            <span class="upb-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div id="upb-body"></div>
+                <div id="upb-foot"></div>
+            `;
+
+            const body = this.element.querySelector("#upb-body");
+            body.append(this.createColumn("Allowed", "allow"), this.createColumn("Denied", "deny"));
+
+            this.element.querySelector("#upb-foot").appendChild(createButton("Close", "neutral", () => this.hide()));
+
+            document.body.appendChild(this.element);
+
+            this.refreshLists();
+            this.bindConfigEvents();
+
+            this.escapeHandler = e => { if (e.key === 'Escape') this.hide(); };
+            window.addEventListener('keydown', this.escapeHandler);
         }
-        hide() { if (this.el) this.el.remove(); this.el = null; window.removeEventListener('keydown', this.esc); }
-        col(ttl, typ) {
-            const c = document.createElement("div"); c.className = "upb-col";
-            // Mobile Friendly Inputs
-            const i = document.createElement("input"); 
-            i.className = "upb-inp"; 
-            i.placeholder = "domain.com";
-            i.setAttribute("autocorrect", "off");
-            i.setAttribute("autocapitalize", "off");
-            i.setAttribute("spellcheck", "false");
-            
-            const ul = document.createElement("ul"); ul.className = `upb-list upb-l-${typ}`;
-            const add = mkBtn("Add", "trust", () => { const d = DomainMgr.parse(i.value); if(d){ i.value=""; DomainMgr.mod(d, typ); }});
-            i.onkeydown = e => e.key === "Enter" && add.click();
-            const h = document.createElement("h3"); h.textContent = ttl; h.style.cssText="margin:0 0 10px 0;text-align:center";
-            const f = document.createElement("div"); f.style.cssText="display:flex;gap:8px;margin-bottom:10px"; f.append(i, add);
-            c.append(h, f, ul);
-            return c;
+
+        hide() {
+            if (this.element) this.element.remove();
+            this.element = null;
+            window.removeEventListener('keydown', this.escapeHandler);
         }
-        async fresh() {
-            const idx = await DomainMgr.getIdx();
-            const f = (cls, arr) => {
-                const ul = this.el.querySelector(cls); ul.innerHTML = '';
-                (arr||[]).sort().forEach(d => {
-                    const li = document.createElement("li"); li.className="upb-item";
-                    li.innerHTML = `<span>${d}</span>`;
-                    const x = document.createElement("div"); x.className="upb-del"; x.textContent="×";
-                    x.onclick = () => DomainMgr.mod(d, 'remove');
-                    li.appendChild(x); ul.appendChild(li);
+
+        async bindConfigEvents() {
+            const config = await DomainManager.getConfig();
+            const strictCheck = this.element.querySelector('#upb-strict-mode');
+            const notifyCheck = this.element.querySelector('#upb-notifications');
+
+            if (strictCheck) {
+                strictCheck.checked = config.strictMode;
+                strictCheck.onchange = e => DomainManager.setConfig({ strictMode: e.target.checked });
+            }
+            if (notifyCheck) {
+                notifyCheck.checked = config.notifications;
+                notifyCheck.onchange = e => DomainManager.setConfig({ notifications: e.target.checked });
+            }
+        }
+
+        createColumn(title, type) {
+            const col = document.createElement("div");
+            col.className = "upb-col";
+
+            const input = document.createElement("input");
+            input.className = "upb-inp";
+            input.placeholder = "domain.com";
+            input.setAttribute("autocorrect", "off");
+            input.setAttribute("autocapitalize", "off");
+            input.setAttribute("spellcheck", "false");
+
+            const list = document.createElement("ul");
+            list.className = `upb-list upb-l-${type}`;
+
+            const addBtn = createButton("Add", "trust", () => {
+                const domain = DomainManager.parseDomain(input.value);
+                if (domain) {
+                    input.value = "";
+                    DomainManager.modifyDomain(domain, type);
+                }
+            });
+
+            input.onkeydown = e => e.key === "Enter" && addBtn.click();
+
+            const header = document.createElement("h3");
+            header.textContent = title;
+            header.style.cssText = "margin:0 0 10px 0;text-align:center";
+
+            const form = document.createElement("div");
+            form.style.cssText = "display:flex;gap:8px;margin-bottom:10px";
+            form.append(input, addBtn);
+
+            col.append(header, form, list);
+            return col;
+        }
+
+        async refreshLists() {
+            const index = await DomainManager.getIndex();
+
+            const updateList = (selector, items) => {
+                const ul = this.element.querySelector(selector);
+                if (!ul) return;
+                ul.innerHTML = '';
+                (items || []).sort().forEach(domain => {
+                    const li = document.createElement("li");
+                    li.className = "upb-item";
+                    li.innerHTML = `<span>${domain}</span>`;
+
+                    const delBtn = document.createElement("div");
+                    delBtn.className = "upb-del";
+                    delBtn.textContent = "×";
+                    delBtn.onclick = () => DomainManager.modifyDomain(domain, 'remove');
+
+                    li.appendChild(delBtn);
+                    ul.appendChild(li);
                 });
             };
-            f('.upb-l-allow', idx.a);
-            f('.upb-l-deny', idx.d);
+
+            updateList('.upb-l-allow', index.a);
+            updateList('.upb-l-deny', index.d);
+        }
+
+        async refreshConfig() {
+            // Re-bind to update UI state if changed externally
+            this.bindConfigEvents();
         }
     }
 
+    /**
+     * Redirect Shield
+     * Prevents pages from redirecting the current tab when a popup is blocked.
+     */
     const Shield = {
-        a: false, p: false,
-        h(e) { if(!this.p) { e.preventDefault(); e.returnValue = ""; return ""; } },
-        arm() { if(!this.a) { window.addEventListener("beforeunload", this.h.bind(this), true); this.a = true; } },
-        disarm() { if(this.a) { window.removeEventListener("beforeunload", this.h.bind(this), true); this.a = false; } },
-        pass(cb) { this.p = true; if(cb) cb(); setTimeout(() => this.p = false, 500); }
+        active: false,
+        passing: false,
+        handler(e) {
+            if (!this.passing) {
+                e.preventDefault();
+                e.returnValue = "";
+                return "";
+            }
+        },
+        arm() {
+            if (!this.active) {
+                window.addEventListener("beforeunload", this.handler.bind(this), true);
+                this.active = true;
+            }
+        },
+        disarm() {
+            if (this.active) {
+                window.removeEventListener("beforeunload", this.handler.bind(this), true);
+                this.active = false;
+            }
+        },
+        pass(callback) {
+            this.passing = true;
+            if (callback) callback();
+            setTimeout(() => this.passing = false, 500);
+        }
     };
 
-    // --- INIT & LOGIC ---
-    const Conf = new Config();
-    const Noti = new Notify();
-    let State = "ask";
+    // --- INITIALIZATION & MAIN LOGIC ---
+    const ConfigUI = new ConfigManager();
+    const Notification = new NotificationBar();
+    let CurrentState = "ask";
     let DenyToastDebounce = 0;
 
     async function loadState() {
-        const d = await DomainMgr.parse(location.hostname);
-        State = await DomainMgr.state(d);
+        const domain = DomainManager.parseDomain(location.hostname);
+        CurrentState = await DomainManager.getDomainState(domain);
     }
 
     function handleDeny() {
         Shield.arm();
         const now = Date.now();
         if (now - DenyToastDebounce > 1000) {
-            global._upb_t.show("🚫 Popup Blocked");
+            globalScope._upb_toast.show("🚫 Popup Blocked");
             DenyToastDebounce = now;
         }
         return FakeWindow;
     }
 
-    function trap(e) {
-        if (State === "allow") return;
-        let pop = false, url = "";
-        
-        if (e.type === "click") {
-            const el = e.target.closest("a");
-            if (el && el.href && !el.hasAttribute('download')) {
-                if (el.target === "_blank" || (document.querySelector('base[target="_blank"]') && el.target !== "_self")) {
-                    pop = true; url = el.href;
+    function trapEvent(e) {
+        if (CurrentState === "allow") return;
+
+        let isPopup = false;
+        let url = "";
+
+        // Handle Click and AuxClick (Middle Mouse)
+        if (e.type === "click" || e.type === "auxclick") {
+            const link = e.target.closest("a");
+            if (link && link.href && !link.hasAttribute('download')) {
+                // Check for target="_blank" or middle click
+                const isBlank = link.target === "_blank" || (document.querySelector('base[target="_blank"]') && link.target !== "_self");
+                const isMiddleClick = e.type === "auxclick" && e.button === 1;
+
+                if (isBlank || isMiddleClick) {
+                    isPopup = true;
+                    url = link.href;
                 }
             }
         } else if (e.type === "submit") {
-            const el = e.target.closest("form");
-            if (el && el.target === "_blank") { pop = true; url = el.action || location.href; }
+            const form = e.target.closest("form");
+            if (form && form.target === "_blank") {
+                isPopup = true;
+                url = form.action || location.href;
+            }
         }
 
-        if (pop) {
-            e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-            if (State === "deny") handleDeny();
-            else Noti.show(url);
+        if (isPopup) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            if (CurrentState === "deny") handleDeny();
+            else Notification.show(url);
         }
     }
 
-    function override() {
-        const h = {
-            value: function(u, t, f) {
-                if (State === "allow") return realOpen.apply(this, arguments);
-                if (State === "deny") return handleDeny();
-                Noti.show(u);
+    function overrideOpen() {
+        const handler = {
+            value: function (url, target, features) {
+                if (CurrentState === "allow") return originalOpen.apply(this, arguments);
+                if (CurrentState === "deny") return handleDeny();
+
+                Notification.show(url);
                 return FakeWindow;
             },
-            writable: false, configurable: false
+            writable: false,
+            configurable: false
         };
-        try { Object.defineProperty(global, 'open', h); } 
-        catch { global.open = h.value; }
+
+        try { Object.defineProperty(globalScope, 'open', handler); }
+        catch { globalScope.open = handler.value; }
     }
 
+    // Main Entry Point
     (async () => {
-        global._upb_t = new Toast();
-        
+        globalScope._upb_toast = new Toast();
+
+        // Inject CSS
         if (!document.getElementById('upb-css')) {
-            const s = document.createElement("style");
-            s.id = 'upb-css';
-            s.textContent = CSS;
-            (document.head || document.documentElement).appendChild(s);
+            const style = document.createElement("style");
+            style.id = 'upb-css';
+            style.textContent = STYLES;
+            (document.head || document.documentElement).appendChild(style);
         }
 
         await loadState();
-        override();
-        
-        window.addEventListener("click", trap, true);
-        window.addEventListener("submit", trap, true);
-        
+        overrideOpen();
+
+        // Event Listeners
+        window.addEventListener("click", trapEvent, true);
+        window.addEventListener("auxclick", trapEvent, true); // Middle click support
+        window.addEventListener("submit", trapEvent, true);
+
         // Universal pointerdown for robust mobile/PC interaction
         window.addEventListener("pointerdown", e => {
-            const a = e.target.closest('a');
-            if(a && a.href && a.target !== '_blank' && !a.href.startsWith('javascript:')) Shield.pass();
+            const link = e.target.closest('a');
+            if (link && link.href && link.target !== '_blank' && !link.href.startsWith('javascript:')) {
+                Shield.pass();
+            }
         }, true);
 
-        let t;
-        const obs = new MutationObserver(() => {
-            clearTimeout(t);
-            t = setTimeout(() => { if(global.open === realOpen) override(); }, 200);
+        // Watch for overrides of window.open
+        let mutationTimer;
+        const observer = new MutationObserver(() => {
+            clearTimeout(mutationTimer);
+            mutationTimer = setTimeout(() => {
+                if (globalScope.open === originalOpen) overrideOpen();
+            }, 200);
         });
-        if(document.body) obs.observe(document.body, {childList:true, subtree:true});
-        
-        Events.on("change", async () => { await loadState(); override(); });
-        GM.registerMenuCommand("⚙️ Settings", () => Conf.show());
+
+        if (document.body) observer.observe(document.body, { childList: true, subtree: true });
+
+        // Listen for state changes
+        Events.on("change", async () => {
+            await loadState();
+            overrideOpen();
+        });
+
+        Events.on("configChange", async () => {
+            await loadState();
+        });
+
+        // Register Menu Command
+        GM.registerMenuCommand("⚙️ Settings", () => ConfigUI.show());
     })();
 })();
