@@ -3,7 +3,7 @@
 // @description  A sleek, modern popup blocker with an Apple-inspired glassmorphism UI and advanced redirect protection.
 // @namespace    https://github.com/1Tdd
 // @author       1Tdd
-// @version      2.0
+// @version      2.0.1
 // @include      *
 // @license      MIT
 // @homepage     https://github.com/1Tdd/ultra-popup-blocker
@@ -147,9 +147,12 @@
 
         static parseDomain(url) {
             try {
+                if (url.includes('localhost')) return 'localhost';
                 let hostname = url.includes("//") ? new URL(url).hostname : url;
                 hostname = hostname.trim().toLowerCase().replace(/^www\./, '');
-                if (!hostname.includes('.')) return null;
+
+                // Allow simple hostnames without dots (e.g., localhost, internal names)
+                if (!hostname.includes('.')) return hostname;
 
                 // Basic TLD handling - can be improved with a public suffix list if needed,
                 // but for a userscript, this heuristic is usually sufficient.
