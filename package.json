@@ -4,7 +4,8 @@
   "description": "Configurable popup blocker that blocks all popup windows by default.",
   "main": "ultra-popup-blocker.user.js",
   "scripts": {
-    "test": "npx standard"
+    "lint": "eslint .",
+    "format": "prettier --write ."
   },
   "repository": {
     "type": "git",
@@ -17,11 +18,9 @@
   },
   "homepage": "https://github.com/1Tdd/ultra-popup-blocker#readme",
   "devDependencies": {
-    "standard": "^17.1.2"
-  },
-  "standard": {
-    "env": [
-      "greasemonkey"
-    ]
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-userscripts": "^0.5.0",
+    "prettier": "^3.2.5"
   }
 }

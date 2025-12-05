@@ -4,14 +4,14 @@
 // @namespace    https://github.com/1Tdd
 // @author       1Tdd
 // @version      2.0.1
-// @include      *
 // @license      MIT
 // @homepage     https://github.com/1Tdd/ultra-popup-blocker
+// @homepageURL  https://github.com/1Tdd/ultra-popup-blocker
 // @supportURL   https://github.com/1Tdd/ultra-popup-blocker/issues/new
 // @icon         data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJhdXJvcmEtZ3JhZGllbnQiIHgxPSIwJSIgeTE9IjEwMCUiIHgyPSIxMDAlIiB5Mj0iMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM1ODU2RDYiLz48c3RvcCBvZmZzZXQ9IjUwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGMkQ1NSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGOTgwQSIvPjwvbGluZWFyR3JhZGllbnQ+PG1hc2sgaWQ9InRleHQtbWFzayI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IndoaXRlIiAvPjx0ZXh0IHg9IjUwJSIgeT0iNTMlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgQmxpbmtNYWNTeXN0Rm9udCwgJ1NlZ29lIFVJJywgUm9ib3RvLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjQwIiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iYmxhY2siPlVQQjwvdGV4dD48L21hc2s+PC9kZWZzPjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiByeD0iMjIiIGZpbGw9IiMwMDAwMDAiIC8+PHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iODAiIGhlaWdodD0iODAiIHJ4PSIyMiIgZmlsbD0idXJsKCNhdXJvcmEtZ3JhZGllbnQpIiBtYXNrPSJ1cmwoI3RleHQtbWFzaykiIC8+PC9zdmc+
 // @compatible   firefox Tampermonkey / Violentmonkey
 // @compatible   chrome Tampermonkey / Violentmonkey
-// @run-at       document-start
+// @match        *://*/*
 // @grant        GM.getValue
 // @grant        GM.setValue
 // @grant        GM.deleteValue
@@ -125,26 +125,44 @@
 
     /**
      * Domain Manager
-     * Handles allowing/denying domains and storage.
+     * Handles allowing/denying domains and storage interactions.
      */
     class DomainManager {
+        /**
+         * Retrieves the current index of allowed/denied domains.
+         * @returns {Promise<{a: string[], d: string[]}>} The index object containing allow (a) and deny (d) lists.
+         */
         static async getIndex() {
             const data = await GM.getValue(CONSTANTS.STORAGE_KEYS.IDX);
             return (data && data.a) ? data : { a: [], d: [] };
         }
 
+        /**
+         * Retrieves the current configuration.
+         * @returns {Promise<{strictMode: boolean, notifications: boolean}>} The configuration object.
+         */
         static async getConfig() {
             const defaults = { strictMode: false, notifications: true };
             const config = await GM.getValue(CONSTANTS.STORAGE_KEYS.CONFIG);
             return { ...defaults, ...config };
         }
 
+        /**
+         * Updates the configuration.
+         * @param {Object} newConfig - The new configuration properties to merge.
+         */
         static async setConfig(newConfig) {
             const current = await this.getConfig();
             await GM.setValue(CONSTANTS.STORAGE_KEYS.CONFIG, { ...current, ...newConfig });
             Events.emit("configChange");
         }
 
+        /**
+         * Parses a URL to extract the relevant hostname.
+         * Supports explicit localhost handling and TLD extraction logic.
+         * @param {string} url - The URL or hostname to parse.
+         * @returns {string|null} The parsed hostname or null if parsing fails.
+         */
         static parseDomain(url) {
             try {
                 if (url.includes('localhost')) return 'localhost';
@@ -166,6 +184,11 @@
             } catch { return null; }
         }
 
+        /**
+         * Determines the state (allow/deny/ask) for a given domain.
+         * @param {string} domain - The domain to check.
+         * @returns {Promise<"allow"|"deny"|"ask">} The state of the domain.
+         */
         static async getDomainState(domain) {
             if (!domain) return "ask";
 
@@ -180,6 +203,11 @@
             return "ask";
         }
 
+        /**
+         * Modifies the state of a domain in storage.
+         * @param {string} domain - The domain to modify.
+         * @param {"allow"|"deny"|"remove"} type - The action to perform.
+         */
         static async modifyDomain(domain, type) {
             const index = await this.getIndex();
 
@@ -217,10 +245,20 @@
 
     /**
      * Toast Notification
+     * Displays transient messages to the user.
      */
     class Toast {
-        constructor() { this.element = null; this.timer = null; }
+        constructor() {
+            /** @type {HTMLElement|null} */
+            this.element = null;
+            /** @type {number|null} */
+            this.timer = null;
+        }
 
+        /**
+         * Shows a toast message.
+         * @param {string} message - The message to display.
+         */
         async show(message) {
             const config = await DomainManager.getConfig();
             if (!config.notifications) return;
@@ -252,14 +290,22 @@
 
     /**
      * Action Bar (Bottom Bar)
+     * Handles the UI interactions when a popup is blocked.
      */
     class NotificationBar {
         constructor() {
+            /** @type {HTMLElement|null} */
             this.element = null;
+            /** @type {number|null} */
             this.timer = null;
+            /** @type {number} */
             this.count = CONSTANTS.TIMEOUT_SECONDS;
         }
 
+        /**
+         * Displays the notification bar for a blocked URL.
+         * @param {string} url - The URL of the blocked popup.
+         */
         show(url) {
             if (!this.element) {
                 this.element = document.createElement("div");
@@ -312,6 +358,9 @@
             }, 1000);
         }
 
+        /**
+         * Hides the notification bar and disarms the shield.
+         */
         hide() {
             Shield.disarm();
             if (this.timer) clearInterval(this.timer);
@@ -324,14 +373,22 @@
 
     /**
      * Configuration UI
+     * Manages the settings modal and user interactions.
      */
     class ConfigManager {
         constructor() {
+            /** @type {HTMLElement|null} */
             this.element = null;
+            /** @type {(e: KeyboardEvent) => void} */
+            this.escapeHandler = null;
+
             Events.on("change", () => this.element && this.refreshLists());
             Events.on("configChange", () => this.element && this.refreshConfig());
         }
 
+        /**
+         * Toggles the visibility of the configuration modal.
+         */
         show() {
             if (this.element) return this.hide();
 
@@ -373,12 +430,21 @@
             window.addEventListener('keydown', this.escapeHandler);
         }
 
+        /**
+         * Closes the configuration modal.
+         */
         hide() {
             if (this.element) this.element.remove();
             this.element = null;
-            window.removeEventListener('keydown', this.escapeHandler);
+            if (this.escapeHandler) {
+                window.removeEventListener('keydown', this.escapeHandler);
+                this.escapeHandler = null;
+            }
         }
 
+        /**
+         * Binds event listeners to the configuration toggles.
+         */
         async bindConfigEvents() {
             const config = await DomainManager.getConfig();
             const strictCheck = this.element.querySelector('#upb-strict-mode');
@@ -394,6 +460,12 @@
             }
         }
 
+        /**
+         * Creates a column in the UI for allow/deny lists.
+         * @param {string} title - Column title.
+         * @param {"allow"|"deny"} type - The list type.
+         * @returns {HTMLElement} The column element.
+         */
         createColumn(title, type) {
             const col = document.createElement("div");
             col.className = "upb-col";
@@ -430,6 +502,9 @@
             return col;
         }
 
+        /**
+         * Refreshes the allow/deny lists from storage.
+         */
         async refreshLists() {
             const index = await DomainManager.getIndex();
 
@@ -456,6 +531,9 @@
             updateList('.upb-l-deny', index.d);
         }
 
+        /**
+         * Updates the UI to match the current configuration.
+         */
         async refreshConfig() {
             // Re-bind to update UI state if changed externally
             this.bindConfigEvents();
@@ -555,7 +633,7 @@
 
     function overrideOpen() {
         const handler = {
-            value: function (url, target, features) {
+            value: function (url) {
                 if (CurrentState === "allow") return originalOpen.apply(this, arguments);
                 if (CurrentState === "deny") return handleDeny();
 
