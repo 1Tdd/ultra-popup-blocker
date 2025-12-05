@@ -35,7 +35,7 @@ A stunning, blur-backed interface that feels native to modern operating systems.
 *   **The "Black Hole" Proxy:** Uses a recursive `FakeWindow` proxy that absorbs detection attempts. It tricks anti-adblock scripts into thinking a popup opened successfully, preventing site breakage while keeping the popup blocked.
 *   **State-Caching Architecture:** Domain status checks are now **O(1)** (instant). Zero lag, even on the heaviest web pages.
 *   **Strict Mode:** New option to block ALL popups by default, providing maximum protection.
-*   **CSP Compliance:** Strict "No `innerHTML`" policy ensuring compatibility with security-hardened websites (like GitHub, Twitter, banking sites).
+*   **Strict Mode:** New option to block ALL popups by default, providing maximum protection.
 
 ### ⚡ Intelligent Defense Layers
 1.  **Trap:** Intercepts `window.open`, `target="_blank"`, and simulated mouse events (including middle-click).

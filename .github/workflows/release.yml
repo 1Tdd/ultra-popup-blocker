@@ -20,14 +20,14 @@ jobs:
         id: get_version
         run: |
           VERSION=$(grep -oP '@version\s+\K[\d.]+' src/ultra-popup-blocker.user.js)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "Detected version: $VERSION"
 
       - name: Check if Tag Exists
         id: check_tag
         run: |
-          if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
-            echo "Tag v${{ env.VERSION }} already exists. Skipping release."
+          if git rev-parse "v${{ steps.get_version.outputs.VERSION }}" >/dev/null 2>&1; then
+            echo "Tag v${{ steps.get_version.outputs.VERSION }} already exists. Skipping release."
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
@@ -37,10 +37,10 @@ jobs:
         if: steps.check_tag.outputs.exists == 'false'
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ env.VERSION }}
-          name: v${{ env.VERSION }}
+          tag_name: v${{ steps.get_version.outputs.VERSION }}
+          name: v${{ steps.get_version.outputs.VERSION }}
           files: src/ultra-popup-blocker.user.js
-          body: "Automated release for version ${{ env.VERSION }}"
+          body: "Automated release for version ${{ steps.get_version.outputs.VERSION }}"
           draft: false
           prerelease: false
         env:
