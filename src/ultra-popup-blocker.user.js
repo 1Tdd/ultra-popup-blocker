@@ -1,14 +1,14 @@
 // ==UserScript==
-// @name         Ultra Popup Blocker v2
+// @name         Ultra Popup Blocker v2.0.2
 // @description  A sleek, modern popup blocker with an Apple-inspired glassmorphism UI and advanced redirect protection.
 // @namespace    https://github.com/1Tdd
 // @author       1Tdd
-// @version      2.0.1
+// @version      2.0.2
 // @license      MIT
 // @homepage     https://github.com/1Tdd/ultra-popup-blocker
 // @homepageURL  https://github.com/1Tdd/ultra-popup-blocker
 // @supportURL   https://github.com/1Tdd/ultra-popup-blocker/issues/new
-// @icon         data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJhdXJvcmEtZ3JhZGllbnQiIHgxPSIwJSIgeTE9IjEwMCUiIHgyPSIxMDAlIiB5Mj0iMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM1ODU2RDYiLz48c3RvcCBvZmZzZXQ9IjUwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGMkQ1NSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGOTgwQSIvPjwvbGluZWFyR3JhZGllbnQ+PG1hc2sgaWQ9InRleHQtbWFzayI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IndoaXRlIiAvPjx0ZXh0IHg9IjUwJSIgeT0iNTMlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgQmxpbmtNYWNTeXN0Rm9udCwgJ1NlZ29lIFVJJywgUm9ib3RvLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjQwIiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iYmxhY2siPlVQQjwvdGV4dD48L21hc2s+PC9kZWZzPjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiByeD0iMjIiIGZpbGw9IiMwMDAwMDAiIC8+PHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iODAiIGhlaWdodD0iODAiIHJ4PSIyMiIgZmlsbD0idXJsKCNhdXJvcmEtZ3JhZGllbnQpIiBtYXNrPSJ1cmwoI3RleHQtbWFzaykiIC8+PC9zdmc+
+// @icon         data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJhdXJvcmEtZ3JhZGllbnQiIHgxPSIwJSIgeTE9IjEwMCUiIHgyPSIxMDAlIiB5Mj0iMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM1ODU2RDYiLz48c3RvcCBvZmZzZXQ9IjUwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGMkQ1NSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGOTgwQSIvPjwvbGluZWFyR3JhZGllbnQ+PG1hc2sgaWQ9InRleHQtbWFzayI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IndoaXRlIiAvPjx0ZXh0IHg9IjUwJSIgeT0iNTMlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgQmxpbmtNYWNTeXN0Rm9udCwgJ1NlZ29lIFVJJywgUm9ib3RvLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjQwIiBmb250LWdlaWdodD0iYm9sZCIgZmlsbD0iYmxhY2siPlVQQjwvdGV4dD48L21hc2s+PC9kZWZzPjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiByeD0iMjIiIGZpbGw9IiMwMDAwMDAiIC8+PHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iODAiIGhlaWdodD0iODAiIHJ4PSIyMiIgZmlsbD0idXJsKCNhdXJvcmEtZ3JhZGllbnQpIiBtYXNrPSJ1cmwoI3RleHQtbWFzaykiIC8+PC9zdmc+
 // @compatible   firefox Tampermonkey / Violentmonkey
 // @compatible   chrome Tampermonkey / Violentmonkey
 // @match        *://*/*
@@ -325,7 +325,22 @@
 
             const info = document.createElement("div");
             info.className = "upb-info";
-            info.innerHTML = `<img src="${CONSTANTS.LOGO_SVG}" style="width:20px;height:20px"><span>Blocked popup to <a href="${url}" target="_blank" style="color:#64D2FF;text-decoration:none">${url.length > 40 ? url.substring(0, 40) + '...' : url}</a></span>`;
+
+            const img = document.createElement("img");
+            img.src = CONSTANTS.LOGO_SVG;
+            img.style.cssText = "width:20px;height:20px";
+
+            const textSpan = document.createElement("span");
+            textSpan.textContent = "Blocked popup to ";
+
+            const link = document.createElement("a");
+            link.href = url;
+            link.target = "_blank";
+            link.style.cssText = "color:#64D2FF;text-decoration:none";
+            link.textContent = url.length > 40 ? url.substring(0, 40) + '...' : url;
+
+            textSpan.appendChild(link);
+            info.append(img, textSpan);
 
             const actions = document.createElement("div");
             actions.className = "upb-actions";
@@ -477,6 +492,11 @@
             input.setAttribute("autocapitalize", "off");
             input.setAttribute("spellcheck", "false");
 
+            // Fix: Stop propagation to prevent site shortcuts from blocking input
+            ['keydown', 'keyup', 'keypress', 'input', 'change'].forEach(evt => {
+                input.addEventListener(evt, e => e.stopPropagation());
+            });
+
             const list = document.createElement("ul");
             list.className = `upb-list upb-l-${type}`;
 
@@ -576,7 +596,7 @@
     // --- INITIALIZATION & MAIN LOGIC ---
     const ConfigUI = new ConfigManager();
     const Notification = new NotificationBar();
-    let CurrentState = "ask";
+    let CurrentState = "pending"; // Start as pending to indicate not yet loaded
     let DenyToastDebounce = 0;
 
     async function loadState() {
@@ -600,9 +620,15 @@
         let isPopup = false;
         let url = "";
 
-        // Handle Click and AuxClick (Middle Mouse)
-        if (e.type === "click" || e.type === "auxclick") {
-            const link = e.target.closest("a");
+        // Wait for state if pending (simple heuristic: treat as 'ask' or 'deny' if critical)
+        // ideally we can't wait in a sync event handler, so we fallback to safe defaults.
+        const effectiveState = CurrentState === 'pending' ? 'ask' : CurrentState;
+
+        // Handle Mouse/Pointer Events
+        if (['click', 'auxclick', 'mousedown', 'mouseup', 'pointerdown', 'pointerup'].includes(e.type)) {
+            const tempTarget = e.target;
+            const link = (tempTarget && tempTarget.closest) ? tempTarget.closest("a") : null;
+
             if (link && link.href && !link.hasAttribute('download')) {
                 // Check for target="_blank" or middle click
                 const isBlank = link.target === "_blank" || (document.querySelector('base[target="_blank"]') && link.target !== "_self");
@@ -626,7 +652,7 @@
             e.stopPropagation();
             e.stopImmediatePropagation();
 
-            if (CurrentState === "deny") handleDeny();
+            if (effectiveState === "deny") handleDeny();
             else Notification.show(url);
         }
     }
@@ -634,8 +660,9 @@
     function overrideOpen() {
         const handler = {
             value: function (url) {
-                if (CurrentState === "allow") return originalOpen.apply(this, arguments);
-                if (CurrentState === "deny") return handleDeny();
+                const effectiveState = CurrentState === 'pending' ? 'ask' : CurrentState;
+                if (effectiveState === "allow") return originalOpen.apply(this, arguments);
+                if (effectiveState === "deny") return handleDeny();
 
                 Notification.show(url);
                 return FakeWindow;
@@ -648,11 +675,34 @@
         catch { globalScope.open = handler.value; }
     }
 
+    // Hook dispatchEvent to stop synthetic clicks at the source
+    // We must target the page's EventTarget explicitly via globalScope if available
+    const TargetProto = globalScope.EventTarget ? globalScope.EventTarget.prototype : EventTarget.prototype;
+    const originalDispatch = TargetProto.dispatchEvent;
+
+    TargetProto.dispatchEvent = function (event) {
+        if (!(this instanceof Element)) {
+            return originalDispatch.apply(this, arguments);
+        }
+        if (!event.isTrusted && (event.type === 'click' || event.type === 'mousedown' || event.type === 'mouseup')) {
+            const link = this.tagName === 'A' ? this : this.closest && this.closest('a');
+            if (link && link.href) {
+                // Silently drop synthetic clicks on links
+                return false;
+            }
+        }
+        return originalDispatch.apply(this, arguments);
+    };
+
     // Main Entry Point
     (async () => {
         globalScope._upb_toast = new Toast();
 
-        // Inject CSS
+        // 1. Immediate Synchronous Protection (Fixes Race Condition #1)
+        // We override window.open immediately, even before state is loaded.
+        overrideOpen();
+
+        // 2. Inject CSS
         if (!document.getElementById('upb-css')) {
             const style = document.createElement("style");
             style.id = 'upb-css';
@@ -660,13 +710,35 @@
             (document.head || document.documentElement).appendChild(style);
         }
 
+        // 3. Attach Observers (Fixes Observer Fail #2)
+        // Observe documentElement if body is missing at document-start
+        let mutationTimer;
+        const observer = new MutationObserver(() => {
+            clearTimeout(mutationTimer);
+            mutationTimer = setTimeout(() => {
+                // Re-apply override if it was removed
+                if (globalScope.open === originalOpen) overrideOpen();
+            }, 200);
+        });
+
+        const targetNode = document.body || document.documentElement;
+        if (targetNode) {
+            observer.observe(targetNode, { childList: true, subtree: true });
+        } else {
+            // Fallback for extremely early execution where even documentElement might be weird (rare)
+            document.addEventListener('DOMContentLoaded', () => {
+                observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
+            });
+        }
+
+        // 4. Load State Asynchronously
         await loadState();
-        overrideOpen();
+        // State updated, override logic will naturally use the new CurrentState
 
         // Event Listeners
-        window.addEventListener("click", trapEvent, true);
-        window.addEventListener("auxclick", trapEvent, true); // Middle click support
-        window.addEventListener("submit", trapEvent, true);
+        // Event Listeners - Capture specific phases
+        const types = ['click', 'auxclick', 'mousedown', 'mouseup', 'pointerdown', 'pointerup'];
+        types.forEach(type => window.addEventListener(type, trapEvent, true));
 
         // Universal pointerdown for robust mobile/PC interaction
         window.addEventListener("pointerdown", e => {
@@ -676,21 +748,9 @@
             }
         }, true);
 
-        // Watch for overrides of window.open
-        let mutationTimer;
-        const observer = new MutationObserver(() => {
-            clearTimeout(mutationTimer);
-            mutationTimer = setTimeout(() => {
-                if (globalScope.open === originalOpen) overrideOpen();
-            }, 200);
-        });
-
-        if (document.body) observer.observe(document.body, { childList: true, subtree: true });
-
         // Listen for state changes
         Events.on("change", async () => {
             await loadState();
-            overrideOpen();
         });
 
         Events.on("configChange", async () => {

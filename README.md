@@ -5,7 +5,7 @@
 # Ultra Popup Blocker
 ### The Universal Solution for a Cleaner Web
 
-[![Version](https://img.shields.io/badge/version-2.0-007AFF.svg?style=for-the-badge)](https://github.com/1Tdd/ultra-popup-blocker/releases)
+[![Version](https://img.shields.io/badge/version-v2.0.2-30D158.svg?style=for-the-badge)](https://github.com/1Tdd/ultra-popup-blocker/releases)
 [![License](https://img.shields.io/badge/license-MIT-34C759.svg?style=for-the-badge)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Universal-5856D6.svg?style=for-the-badge)]()
 
@@ -31,11 +31,11 @@ A stunning, blur-backed interface that feels native to modern operating systems.
   <br><em>(The responsive interface adapting to user interaction)</em>
 </div>
 
-### 🛡️ Advanced Security Core (v2.0)
+### 🛡️ Advanced Security Core (v2.0.2)
 *   **The "Black Hole" Proxy:** Uses a recursive `FakeWindow` proxy that absorbs detection attempts. It tricks anti-adblock scripts into thinking a popup opened successfully, preventing site breakage while keeping the popup blocked.
 *   **State-Caching Architecture:** Domain status checks are now **O(1)** (instant). Zero lag, even on the heaviest web pages.
 *   **Strict Mode:** New option to block ALL popups by default, providing maximum protection.
-*   **Strict Mode:** New option to block ALL popups by default, providing maximum protection.
+
 
 ### ⚡ Intelligent Defense Layers
 1.  **Trap:** Intercepts `window.open`, `target="_blank"`, and simulated mouse events (including middle-click).
