@@ -3,7 +3,7 @@
 // @description  A sleek, modern popup blocker with an Apple-inspired glassmorphism UI and advanced redirect protection.
 // @namespace    https://github.com/1Tdd
 // @author       1Tdd
-// @version      2.0.1
+// @version      2.0.2
 // @license      MIT
 // @homepage     https://github.com/1Tdd/ultra-popup-blocker
 // @homepageURL  https://github.com/1Tdd/ultra-popup-blocker
@@ -391,6 +391,7 @@
          */
         show() {
             if (this.element) return this.hide();
+            InputShield.arm();
 
             this.element = document.createElement("div");
             this.element.id = "upb-modal";
@@ -434,6 +435,7 @@
          * Closes the configuration modal.
          */
         hide() {
+            InputShield.disarm();
             if (this.element) this.element.remove();
             this.element = null;
             if (this.escapeHandler) {
@@ -476,6 +478,7 @@
             input.setAttribute("autocorrect", "off");
             input.setAttribute("autocapitalize", "off");
             input.setAttribute("spellcheck", "false");
+            input.setAttribute("data-upb-input", "true");
 
             const list = document.createElement("ul");
             list.className = `upb-list upb-l-${type}`;
@@ -570,6 +573,43 @@
             this.passing = true;
             if (callback) callback();
             setTimeout(() => this.passing = false, 500);
+        }
+    };
+
+    /**
+     * Input Shield (Anti-PreventDefault Shield)
+     * Protects UPB input fields from hostile websites that block keyboard events.
+     */
+    const InputShield = {
+        active: false,
+        eventTypes: ['keydown', 'keypress', 'keyup', 'input', 'beforeinput'],
+
+        handler(e) {
+            const target = e.target;
+            // Check if the event target is a UPB input field
+            if (target && target.hasAttribute && target.hasAttribute('data-upb-input')) {
+                // Stop the event from reaching hostile site listeners
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+            }
+        },
+
+        arm() {
+            if (this.active) return;
+            this.boundHandler = this.handler.bind(this);
+            this.eventTypes.forEach(type => {
+                // Use capturing phase with highest priority
+                document.addEventListener(type, this.boundHandler, true);
+            });
+            this.active = true;
+        },
+
+        disarm() {
+            if (!this.active) return;
+            this.eventTypes.forEach(type => {
+                document.removeEventListener(type, this.boundHandler, true);
+            });
+            this.active = false;
         }
     };
 
